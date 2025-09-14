@@ -84,7 +84,7 @@
             <div data-index="4" class="clickable-area absolute top-1/2 left-1/2 w-[34%] h-[34%] border-2 border-black cursor-pointer transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></div>
         </div>
         <div class="mt-8 h-8 text-center">
-            <p id="message-text" class="text-lg text-gray-500">Ready</p>
+            <p id="message-text" class="text-lg text-gray-500">Pilih Prediksi</p>
         </div>
     </main>
 
@@ -99,9 +99,14 @@
             </div>
             <div class="p-4 border-b border-gray-300">
                 <h3 class="font-semibold mb-2">Prediksikan ke:</h3>
-                <div class="flex space-x-4">
+                <div class="flex flex-col space-y-2">
                     <label class="flex items-center"><input type="radio" name="searchEngine" value="maps" class="mr-2"> Google Maps</label>
                     <label class="flex items-center"><input type="radio" name="searchEngine" value="google" class="mr-2"> Google Search</label>
+                    <label class="flex items-center"><input type="radio" name="searchEngine" value="shortcut" class="mr-2"> Shortcut iOS</label>
+                </div>
+                <div id="shortcut-name-container" class="hidden mt-3">
+                    <label for="shortcut-name-input" class="block font-medium text-sm mb-1">Nama Shortcut (Harus Sama Persis)</label>
+                    <input type="text" id="shortcut-name-input" placeholder="Contoh: Proses Prediksi" class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black">
                 </div>
             </div>
             <div id="regions-container" class="p-4 space-y-3 overflow-y-auto modal-content-area">
@@ -128,15 +133,25 @@
             </div>
             <div class="p-6 space-y-5 text-gray-800 overflow-y-auto modal-content-area">
                 <div>
-                    <h3 class="font-bold text-black">Cara Kerja:</h3>
+                    <strong>Cara Kerja:</strong>
                     <p class="mt-1">Aplikasi ini akan membuka otomatis Google Maps atau Google Search sesuai area yang Anda tekan. Prediksi akan ditampilkan per 5 item. Untuk menampilkan item ke-6 dan seterusnya, bisa dengan menggeser (swipe) ke kanan atau ke kiri.</p>
                 </div>
                 <div>
-                    <h3 class="font-bold text-black">Tips:</h3>
-                    <p class="mt-1">Gunakan fitur "Prediksikan ke" di dalam pengaturan untuk memilih ingin menampilkan prediksi di Google Maps atau Google Search biasa.</p>
+                    <strong>Integrasi Lanjutan: Shortcut iOS</strong>
+                    <p class="mt-1">Anda bisa menghubungkan aplikasi ini dengan aplikasi Pintasan (Shortcuts) di perangkat iOS untuk aksi yang sepenuhnya kustom. Cara Mengaturnya:</p>
+                    <ol class="list-decimal list-inside mt-2 space-y-1 text-sm">
+                        <li><strong>Buat Pintasan di iOS:</strong> Buka aplikasi Pintasan, buat pintasan baru.</li>
+                        <li><strong>Aktifkan Input:</strong> Di dalam editor pintasan, ketuk `i` atau nama pintasan, lalu aktifkan "Tampilkan di Lembar Berbagi". Ini penting agar pintasan siap menerima teks.</li>
+                        <li><strong>Gunakan Input:</strong> Gunakan variabel "Input Pintasan" di dalam aksi Anda (misalnya, untuk menampilkan notifikasi).</li>
+                        <li><strong>Atur di Aplikasi:</strong> Buka Pengaturan (⚙️), pilih "Shortcut iOS", dan masukkan nama Pintasan Anda <em>dengan sama persis</em>.</li>
+                    </ol>
+                </div>
+                <div>
+                    <strong>Tips:</strong>
+                    <p class="mt-1">Gunakan fitur "Prediksikan ke" di dalam pengaturan untuk memilih ingin menampilkan prediksi di Google Maps, Google Search, atau menjalankan Shortcut iOS.</p>
                 </div>
                  <div>
-                    <h3 class="font-bold text-black">Jadikan Aplikasi:</h3>
+                    <strong>Jadikan Aplikasi:</strong>
                     <p class="mt-1">Aplikasi ini bisa berfungsi seperti aplikasi native. Tekan tombol 'Bagikan' lalu 'Tambahkan ke Layar Utama' (Safari di iOS), atau tekan titik tiga (⋮) lalu 'Tambahkan ke Layar Utama' (Chrome di Android).</p>
                 </div>
             </div>
@@ -153,41 +168,38 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('ServiceWorker registration failed: ', error);
-                    });
+                    .then(registration => console.log('ServiceWorker registration successful.'))
+                    .catch(error => console.log('ServiceWorker registration failed: ', error));
             });
         }
 
-        // Kode aplikasi utama
         document.addEventListener('DOMContentLoaded', () => {
-            const STORAGE_KEY = 'magicAppDataV2';
+            const STORAGE_KEY = 'magicAppDataV3'; // Version up to avoid conflicts
 
             const defaultData = {
-                settings: { searchEngine: 'maps' },
+                settings: { searchEngine: 'maps', shortcutName: '' },
                 pages: [
                     { startNumber: 1, regions: ['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Makassar'] },
                     { startNumber: 6, regions: ['Yogyakarta', 'Semarang', 'Denpasar', 'Palembang', 'Balikpapan'] }
                 ]
             };
             
-            const swipeContainer = document.getElementById('swipe-container');
+            // Elements...
             const clickableAreas = document.querySelectorAll('.clickable-area');
             const messageText = document.getElementById('message-text');
-
             const openSettingsBtn = document.getElementById('open-settings-btn');
             const settingsModal = document.getElementById('settings-modal');
             const closeSettingsModalBtn = document.getElementById('close-settings-modal-btn');
             const regionsContainer = document.getElementById('regions-container');
             const addRegionBtn = document.getElementById('add-region-btn');
             const saveBtn = document.getElementById('save-btn');
-            
             const openInstructionsBtn = document.getElementById('open-instructions-btn');
             const instructionsModal = document.getElementById('instructions-modal');
             const closeInstructionsModalBtn = document.getElementById('close-instructions-modal-btn');
+            const searchEngineRadios = document.querySelectorAll('input[name="searchEngine"]');
+            const shortcutNameContainer = document.getElementById('shortcut-name-container');
+            const shortcutNameInput = document.getElementById('shortcut-name-input');
+
 
             let appData = {};
             let currentPageIndex = 0;
@@ -197,6 +209,10 @@
                 try {
                     const parsedData = JSON.parse(storedData);
                     if (parsedData && parsedData.settings && parsedData.pages) {
+                        // Ensure shortcutName exists for backward compatibility
+                        if (!parsedData.settings.hasOwnProperty('shortcutName')) {
+                            parsedData.settings.shortcutName = '';
+                        }
                         return parsedData;
                     }
                     return defaultData;
@@ -210,20 +226,17 @@
             }
 
             function updateDisplay() {
-                if (!appData.pages || appData.pages.length === 0) return;
+                 if (!appData.pages || appData.pages.length === 0) return;
                 const currentPage = appData.pages[currentPageIndex];
                 if (!currentPage) return;
-
                 clickableAreas.forEach((area, index) => {
                     const regionName = currentPage.regions[index] || '';
                     const number = currentPage.startNumber + index;
-                    
                     area.innerHTML = regionName ? `
                         <div class="content-container w-full h-full flex items-center justify-center">
                             <span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black opacity-10 text-[80px] sm:text-[110px] font-black pointer-events-none z-0">${number}</span>
                             <span class="relative z-10 font-semibold text-lg sm:text-2xl">${regionName}</span>
-                        </div>
-                    ` : '';
+                        </div>` : '';
                 });
             }
 
@@ -244,41 +257,42 @@
                 return div;
             }
 
+            function handleSearchEngineChange() {
+                const selectedEngine = document.querySelector('input[name="searchEngine"]:checked').value;
+                if (selectedEngine === 'shortcut') {
+                    shortcutNameContainer.classList.remove('hidden');
+                } else {
+                    shortcutNameContainer.classList.add('hidden');
+                }
+            }
+
             function populateSettingsModal() {
                 document.querySelector(`input[name="searchEngine"][value="${appData.settings.searchEngine}"]`).checked = true;
+                shortcutNameInput.value = appData.settings.shortcutName || '';
+                handleSearchEngineChange();
                 
                 regionsContainer.innerHTML = '';
                 const allRegions = appData.pages.flatMap(page => page.regions);
-                allRegions.forEach(region => {
-                    regionsContainer.appendChild(createRegionInput(region));
-                });
+                allRegions.forEach(region => regionsContainer.appendChild(createRegionInput(region)));
             }
             
+            searchEngineRadios.forEach(radio => radio.addEventListener('change', handleSearchEngineChange));
+
             openSettingsBtn.addEventListener('click', () => {
                 populateSettingsModal();
                 settingsModal.classList.remove('hidden');
             });
             closeSettingsModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
-            settingsModal.addEventListener('click', (e) => {
-                if (e.target === settingsModal) {
-                    settingsModal.classList.add('hidden');
-                }
-            });
-
+            
+            // Other modal event listeners...
             openInstructionsBtn.addEventListener('click', () => instructionsModal.classList.remove('hidden'));
             closeInstructionsModalBtn.addEventListener('click', () => instructionsModal.classList.add('hidden'));
-            instructionsModal.addEventListener('click', (e) => {
-                if (e.target === instructionsModal) {
-                    instructionsModal.classList.add('hidden');
-                }
-            });
 
-            addRegionBtn.addEventListener('click', () => {
-                regionsContainer.appendChild(createRegionInput());
-            });
+            addRegionBtn.addEventListener('click', () => regionsContainer.appendChild(createRegionInput()));
 
             saveBtn.addEventListener('click', () => {
                 appData.settings.searchEngine = document.querySelector('input[name="searchEngine"]:checked').value;
+                appData.settings.shortcutName = shortcutNameInput.value.trim();
 
                 const inputs = regionsContainer.querySelectorAll('input[type="text"]');
                 const allRegions = Array.from(inputs).map(input => input.value.trim()).filter(Boolean);
@@ -303,40 +317,50 @@
             clickableAreas.forEach(area => {
                 area.addEventListener('click', (event) => {
                     event.stopPropagation();
-                    if (!appData.pages[currentPageIndex]) return;
                     const areaIndex = parseInt(area.dataset.index);
-                    const regionName = appData.pages[currentPageIndex].regions[areaIndex];
+                    const regionName = appData.pages[currentPageIndex]?.regions[areaIndex];
                     
-                    if (regionName) {
+                    if (!regionName) return;
+
+                    messageText.textContent = `Prediksi: ${regionName}`;
+                    const searchEngine = appData.settings.searchEngine;
+                    let url = '';
+
+                    if (searchEngine === 'shortcut') {
+                        const shortcutName = appData.settings.shortcutName;
+                        if (!shortcutName) {
+                            messageText.textContent = 'Nama Shortcut belum diatur!';
+                            return;
+                        }
+                        const encodedShortcutName = encodeURIComponent(shortcutName);
+                        const encodedInput = encodeURIComponent(regionName);
+                        url = `shortcuts://run-shortcut?name=${encodedShortcutName}&input=${encodedInput}`;
+                        window.location.href = url; // Use location.href for URL Schemes
+                    } else {
                         const encodedQuery = encodeURIComponent(regionName);
-                        let url = '';
-                        
-                        if (appData.settings.searchEngine === 'maps') {
+                        if (searchEngine === 'maps') {
                             url = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
-                        } else {
+                        } else { // google
                             url = `https://www.google.com/search?q=${encodedQuery}`;
                         }
-                        
                         window.open(url, '_blank');
-                        messageText.textContent = `Prediksi: ${regionName}`;
                     }
                 });
             });
 
+            // Swipe logic...
             let touchStartX = 0;
-            function handleSwipe(touchEndX) {
-                const deltaX = touchEndX - touchStartX;
+            const swipeContainer = document.getElementById('swipe-container');
+            swipeContainer.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+            swipeContainer.addEventListener('touchend', (e) => {
+                const deltaX = e.changedTouches[0].screenX - touchStartX;
                 const swipeThreshold = 50;
-                
                 if (deltaX < -swipeThreshold && currentPageIndex < appData.pages.length - 1) {
                     changePage(currentPageIndex + 1);
                 } else if (deltaX > swipeThreshold && currentPageIndex > 0) {
                     changePage(currentPageIndex - 1);
                 }
-            }
-            
-            swipeContainer.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-            swipeContainer.addEventListener('touchend', (e) => { handleSwipe(e.changedTouches[0].screenX); });
+            });
 
             function changePage(newIndex) {
                 document.querySelectorAll('.content-container').forEach(el => el.classList.add('fade-out'));

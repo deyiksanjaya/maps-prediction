@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Maps Prediction</title>
+    
+    <!-- Pengaturan Viewport & Non-Zoomable -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Meta Tag PWA -->
+    <meta name="theme-color" content="#ffffff">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Maps Prediction">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/parakeet-line/180/map-marker.png">
+    
+    <!-- Styling & Font -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .content-container {
+            transition: opacity 0.2s ease-in-out;
+        }
+        .content-container.fade-out {
+            opacity: 0;
+        }
+        .modal {
+            z-index: 50;
+        }
+        .modal-content-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-content-area::-webkit-scrollbar-track {
+            background: #e2e8f0;
+        }
+        .modal-content-area::-webkit-scrollbar-thumb {
+            background: #a0aec0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-white text-black">
+
+    <!-- Kontainer Ikon Pojok -->
+    <div class="absolute top-4 left-4 right-4 flex justify-between z-20">
+        <button id="open-settings-btn" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+            <img src="https://img.icons8.com/ios-glyphs/30/000000/settings.png" alt="Pengaturan" class="w-6 h-6"/>
+        </button>
+        <button id="open-instructions-btn" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+            <img src="https://img.icons8.com/ios-glyphs/30/000000/question-mark.png" alt="Instruksi" class="w-6 h-6"/>
+        </button>
+    </div>
+
+    <!-- Kontainer Utama Aplikasi (Pusat Layar) -->
+    <main class="w-full h-full flex flex-col items-center justify-center">
+        <div id="swipe-container" class="relative w-[85vw] h-[85vw] max-w-[500px] max-h-[500px] sm:w-[70vh] sm:h-[70vh] border-2 border-black">
+            <div class="absolute inset-0 pointer-events-none">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-[33%] bg-black"></div>
+                <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0.5 h-[33%] bg-black"></div>
+                <div class="absolute left-0 top-1/2 -translate-y-1/2 h-0.5 w-[33%] bg-black"></div>
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 h-0.5 w-[33%] bg-black"></div>
+            </div>
+            <div class="absolute inset-0 grid grid-cols-2 grid-rows-2">
+                <div data-index="0" class="clickable-area cursor-pointer relative flex items-center justify-center"></div>
+                <div data-index="1" class="clickable-area cursor-pointer relative flex items-center justify-center"></div>
+                <div data-index="2" class="clickable-area cursor-pointer relative flex items-center justify-center"></div>
+                <div data-index="3" class="clickable-area cursor-pointer relative flex items-center justify-center"></div>
+            </div>
+            <div data-index="4" class="clickable-area absolute top-1/2 left-1/2 w-[34%] h-[34%] border-2 border-black cursor-pointer transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></div>
+        </div>
+        <div class="mt-8 h-8 text-center">
+            <p id="message-text" class="text-lg text-gray-500">Pilih Prediksi</p>
+        </div>
+    </main>
+
+    <!-- Modal Pengaturan -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-8 modal">
+        <div class="bg-white border border-black rounded-lg shadow-xl w-full max-w-md flex flex-col text-black max-h-full">
+            <div class="p-4 border-b border-gray-300 flex justify-between items-center">
+                <h2 class="text-xl font-bold">Pengaturan</h2>
+                <button id="close-settings-modal-btn" class="p-1 rounded-full hover:bg-gray-200">
+                    <img src="https://img.icons8.com/ios-filled/24/000000/delete-sign.png" alt="Tutup" class="w-5 h-5"/>
+                </button>
+            </div>
+            <div class="p-4 border-b border-gray-300">
+                <h3 class="font-semibold mb-2">Prediksikan ke:</h3>
+                <div class="flex space-x-4">
+                    <label class="flex items-center"><input type="radio" name="searchEngine" value="maps" class="mr-2"> Google Maps</label>
+                    <label class="flex items-center"><input type="radio" name="searchEngine" value="google" class="mr-2"> Google Search</label>
+                </div>
+            </div>
+            <div id="regions-container" class="p-4 space-y-3 overflow-y-auto modal-content-area">
+            </div>
+            <div class="p-4 border-t border-gray-300 space-y-3">
+                 <button id="add-region-btn" class="w-full bg-gray-200 hover:bg-gray-300 text-black font-bold py-2 px-4 rounded transition-colors">
+                    + Tambah Prediksi
+                </button>
+                <button id="save-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded transition-colors">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Instruksi -->
+    <div id="instructions-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-8 modal">
+        <div class="bg-white border border-black rounded-lg shadow-xl w-full max-w-md flex flex-col text-black max-h-full">
+            <div class="p-4 border-b border-gray-300 flex justify-between items-center">
+                <h2 class="text-xl font-bold">Petunjuk Penggunaan</h2>
+                <button id="close-instructions-modal-btn" class="p-1 rounded-full hover:bg-gray-200">
+                    <img src="https://img.icons8.com/ios-filled/24/000000/delete-sign.png" alt="Tutup" class="w-5 h-5"/>
+                </button>
+            </div>
+            <div class="p-6 space-y-5 text-gray-800 overflow-y-auto modal-content-area">
+                <div>
+                    <h3 class="font-bold text-black">Cara Kerja:</h3>
+                    <p class="mt-1">Aplikasi ini akan membuka otomatis Google Maps atau Google Search sesuai area yang Anda tekan. Prediksi akan ditampilkan per 5 item. Untuk menampilkan item ke-6 dan seterusnya, bisa dengan menggeser (swipe) ke kanan atau ke kiri.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-black">Tips:</h3>
+                    <p class="mt-1">Gunakan fitur "Prediksikan ke" di dalam pengaturan untuk memilih ingin menampilkan prediksi di Google Maps atau Google Search biasa.</p>
+                </div>
+                 <div>
+                    <h3 class="font-bold text-black">Jadikan Aplikasi:</h3>
+                    <p class="mt-1">Aplikasi ini bisa berfungsi seperti aplikasi native. Tekan tombol 'Bagikan' lalu 'Tambahkan ke Layar Utama' (Safari di iOS), atau tekan titik tiga (⋮) lalu 'Tambahkan ke Layar Utama' (Chrome di Android).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Watermark -->
+    <div class="absolute bottom-4 left-0 right-0 text-center italic text-xs text-gray-400 pointer-events-none">
+        concepted by Heri Sanjaya
+    </div>
+
+    <script>
+        // Registrasi Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+
+        // Kode aplikasi utama
+        document.addEventListener('DOMContentLoaded', () => {
+            const STORAGE_KEY = 'magicAppDataV2';
+
+            const defaultData = {
+                settings: { searchEngine: 'maps' },
+                pages: [
+                    { startNumber: 1, regions: ['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Makassar'] },
+                    { startNumber: 6, regions: ['Yogyakarta', 'Semarang', 'Denpasar', 'Palembang', 'Balikpapan'] }
+                ]
+            };
+            
+            const swipeContainer = document.getElementById('swipe-container');
+            const clickableAreas = document.querySelectorAll('.clickable-area');
+            const messageText = document.getElementById('message-text');
+
+            const openSettingsBtn = document.getElementById('open-settings-btn');
+            const settingsModal = document.getElementById('settings-modal');
+            const closeSettingsModalBtn = document.getElementById('close-settings-modal-btn');
+            const regionsContainer = document.getElementById('regions-container');
+            const addRegionBtn = document.getElementById('add-region-btn');
+            const saveBtn = document.getElementById('save-btn');
+            
+            const openInstructionsBtn = document.getElementById('open-instructions-btn');
+            const instructionsModal = document.getElementById('instructions-modal');
+            const closeInstructionsModalBtn = document.getElementById('close-instructions-modal-btn');
+
+            let appData = {};
+            let currentPageIndex = 0;
+
+            function loadDataFromStorage() {
+                const storedData = localStorage.getItem(STORAGE_KEY);
+                try {
+                    const parsedData = JSON.parse(storedData);
+                    if (parsedData && parsedData.settings && parsedData.pages) {
+                        return parsedData;
+                    }
+                    return defaultData;
+                } catch (e) {
+                    return defaultData;
+                }
+            }
+
+            function saveDataToStorage() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            }
+
+            function updateDisplay() {
+                if (!appData.pages || appData.pages.length === 0) return;
+                const currentPage = appData.pages[currentPageIndex];
+                if (!currentPage) return;
+
+                clickableAreas.forEach((area, index) => {
+                    const regionName = currentPage.regions[index] || '';
+                    const number = currentPage.startNumber + index;
+                    
+                    area.innerHTML = regionName ? `
+                        <div class="content-container w-full h-full flex items-center justify-center">
+                            <span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black opacity-10 text-[80px] sm:text-[110px] font-black pointer-events-none z-0">${number}</span>
+                            <span class="relative z-10 font-semibold text-lg sm:text-2xl">${regionName}</span>
+                        </div>
+                    ` : '';
+                });
+            }
+
+            function createRegionInput(regionName = '') {
+                const div = document.createElement('div');
+                div.className = 'flex items-center space-x-2';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = regionName;
+                input.placeholder = 'Prediksi baru';
+                input.className = 'flex-grow bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black';
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = `<img src="https://img.icons8.com/ios-glyphs/20/000000/trash.png" alt="Hapus"/>`;
+                deleteBtn.className = 'p-2 rounded hover:bg-red-200';
+                deleteBtn.onclick = () => div.remove();
+                div.appendChild(input);
+                div.appendChild(deleteBtn);
+                return div;
+            }
+
+            function populateSettingsModal() {
+                document.querySelector(`input[name="searchEngine"][value="${appData.settings.searchEngine}"]`).checked = true;
+                
+                regionsContainer.innerHTML = '';
+                const allRegions = appData.pages.flatMap(page => page.regions);
+                allRegions.forEach(region => {
+                    regionsContainer.appendChild(createRegionInput(region));
+                });
+            }
+            
+            openSettingsBtn.addEventListener('click', () => {
+                populateSettingsModal();
+                settingsModal.classList.remove('hidden');
+            });
+            closeSettingsModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+            settingsModal.addEventListener('click', (e) => {
+                if (e.target === settingsModal) {
+                    settingsModal.classList.add('hidden');
+                }
+            });
+
+            openInstructionsBtn.addEventListener('click', () => instructionsModal.classList.remove('hidden'));
+            closeInstructionsModalBtn.addEventListener('click', () => instructionsModal.classList.add('hidden'));
+            instructionsModal.addEventListener('click', (e) => {
+                if (e.target === instructionsModal) {
+                    instructionsModal.classList.add('hidden');
+                }
+            });
+
+            addRegionBtn.addEventListener('click', () => {
+                regionsContainer.appendChild(createRegionInput());
+            });
+
+            saveBtn.addEventListener('click', () => {
+                appData.settings.searchEngine = document.querySelector('input[name="searchEngine"]:checked').value;
+
+                const inputs = regionsContainer.querySelectorAll('input[type="text"]');
+                const allRegions = Array.from(inputs).map(input => input.value.trim()).filter(Boolean);
+                const newPages = [];
+                let currentNumber = 1;
+                for (let i = 0; i < allRegions.length; i += 5) {
+                    const regionChunk = allRegions.slice(i, i + 5);
+                    newPages.push({ startNumber: currentNumber, regions: regionChunk });
+                    currentNumber = i + 5 + 1;
+                }
+                
+                appData.pages = newPages.length > 0 ? newPages : defaultData.pages;
+                saveDataToStorage();
+                
+                currentPageIndex = 0;
+                updateDisplay();
+                settingsModal.classList.add('hidden');
+                messageText.textContent = "Disimpan!";
+                setTimeout(() => { messageText.textContent = "Pilih Prediksi"; }, 2000);
+            });
+
+            clickableAreas.forEach(area => {
+                area.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (!appData.pages[currentPageIndex]) return;
+                    const areaIndex = parseInt(area.dataset.index);
+                    const regionName = appData.pages[currentPageIndex].regions[areaIndex];
+                    
+                    if (regionName) {
+                        const encodedQuery = encodeURIComponent(regionName);
+                        let url = '';
+                        
+                        if (appData.settings.searchEngine === 'maps') {
+                            url = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
+                        } else {
+                            url = `https://www.google.com/search?q=${encodedQuery}`;
+                        }
+                        
+                        window.open(url, '_blank');
+                        messageText.textContent = `Prediksi: ${regionName}`;
+                    }
+                });
+            });
+
+            let touchStartX = 0;
+            function handleSwipe(touchEndX) {
+                const deltaX = touchEndX - touchStartX;
+                const swipeThreshold = 50;
+                
+                if (deltaX < -swipeThreshold && currentPageIndex < appData.pages.length - 1) {
+                    changePage(currentPageIndex + 1);
+                } else if (deltaX > swipeThreshold && currentPageIndex > 0) {
+                    changePage(currentPageIndex - 1);
+                }
+            }
+            
+            swipeContainer.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+            swipeContainer.addEventListener('touchend', (e) => { handleSwipe(e.changedTouches[0].screenX); });
+
+            function changePage(newIndex) {
+                document.querySelectorAll('.content-container').forEach(el => el.classList.add('fade-out'));
+                setTimeout(() => {
+                    currentPageIndex = newIndex;
+                    updateDisplay();
+                }, 200);
+            }
+
+            appData = loadDataFromStorage();
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>

@@ -265,7 +265,7 @@
             let isSingleItemMode = false;
             let isListening = false;
             let recognition;
-            let matchFound = false; // BUG FIX: Flag to prevent race condition
+            let matchFound = false;
 
             // --- Speech Recognition Setup ---
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -277,7 +277,7 @@
 
                 recognition.onstart = () => {
                     isListening = true;
-                    matchFound = false; // BUG FIX: Reset flag on start
+                    matchFound = false;
                     micBtn.classList.add('bg-red-500', 'listening-animation');
                     micBtn.classList.remove('bg-gray-200');
                     voiceStatus.textContent = 'Mendengarkan...';
@@ -287,7 +287,6 @@
                     isListening = false;
                     micBtn.classList.remove('bg-red-500', 'listening-animation');
                     micBtn.classList.add('bg-gray-200');
-                    // BUG FIX: Only reset the status if no match was found.
                     if (!matchFound) {
                         voiceStatus.textContent = 'Tekan untuk berbicara';
                     }
@@ -304,7 +303,7 @@
                 };
 
                 recognition.onresult = (event) => {
-                    if (matchFound) return; // Don't process further if a match is already being handled
+                    if (matchFound) return;
                     const transcript = Array.from(event.results).map(result => result[0]).map(result => result.transcript).join('');
                     transcriptPreview.textContent = transcript;
                     const startPhrase = appData.settings.startPhrase.toLowerCase();
@@ -326,7 +325,7 @@
             // --- Main Functions ---
             function findAndExecute(keyword) {
                 if (!keyword) return;
-                matchFound = true; // BUG FIX: Set the flag to true
+                matchFound = true;
                 recognition.stop();
                 const allRegions = appData.pages.flatMap(p => p.regions);
                 let bestMatch = null;
@@ -364,12 +363,13 @@
                         return; 
                     }
                     url = `shortcuts://run-shortcut?name=${encodeURIComponent(shortcutName)}&input=${encodeURIComponent(regionName)}`; 
-                    window.location.href = url;
                 } else {
                     url = (searchEngine === 'maps') ? `https://maps.google.com/?q=${encodeURIComponent(regionName)}` : `https://www.google.com/search?q=${encodeURIComponent(regionName)}`;
-                    openInExternalBrowser(url);
                 }
                 
+                // BUG FIX: ALWAYS use the external browser function for ALL cases.
+                openInExternalBrowser(url);
+
                 if(appData.settings.inputMethod === 'grid') {
                     messageText.textContent = `Membuka: ${capitalizeFirstLetter(regionName)}`;
                     messageText.classList.remove('hidden');

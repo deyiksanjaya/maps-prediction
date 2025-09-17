@@ -46,8 +46,16 @@
             transition: opacity 0.3s ease-in-out;
         }
         .modal-content-area::-webkit-scrollbar { width: 8px; }
-        .modal-content-area::-webkit-scrollbar-track { background: #e2e8f0; }
-        .modal-content-area::-webkit-scrollbar-thumb { background: #a0aec0; border-radius: 4px; }
+        .modal-content-area::-webkit-scrollbar-track { background: #f1f1f1; }
+        .modal-content-area::-webkit-scrollbar-thumb { background: #a8a8a8; border-radius: 4px; }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+        }
+        .listening-animation {
+            animation: pulse 1.5s infinite;
+        }
     </style>
 </head>
 <body class="bg-white text-black">
@@ -62,7 +70,8 @@
     </div>
 
     <main class="w-full h-full flex flex-col items-center justify-center">
-        <div id="swipe-container" class="relative w-[85vw] h-[85vw] max-w-[500px] max-h-[500px] sm:w-[70vh] sm:h-[70vh] border-2 border-black">
+        <!-- Grid View -->
+        <div id="grid-view-container" class="relative w-[85vw] h-[85vw] max-w-[500px] max-h-[500px] sm:w-[70vh] sm:h-[70vh] border-2 border-black">
             <div class="absolute inset-0 pointer-events-none">
                 <div class="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-[33%] bg-black"></div>
                 <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0.5 h-[33%] bg-black"></div>
@@ -70,62 +79,77 @@
                 <div class="absolute right-0 top-1/2 -translate-y-1/2 h-0.5 w-[33%] bg-black"></div>
             </div>
             <div class="absolute inset-0 grid grid-cols-2 grid-rows-2">
-                <div data-index="0" class="clickable-area cursor-pointer relative flex items-center justify-center"></div>
-                <div data-index="1" class="clickable-area cursor-pointer relative flex items-center justify-center"></div>
-                <div data-index="2" class="clickable-area cursor-pointer relative flex items-center justify-center"></div>
-                <div data-index="3" class="clickable-area cursor-pointer relative flex items-center justify-center"></div>
+                <div data-index="0" class="clickable-area cursor-pointer relative flex items-center justify-center p-2 text-center"></div>
+                <div data-index="1" class="clickable-area cursor-pointer relative flex items-center justify-center p-2 text-center"></div>
+                <div data-index="2" class="clickable-area cursor-pointer relative flex items-center justify-center p-2 text-center"></div>
+                <div data-index="3" class="clickable-area cursor-pointer relative flex items-center justify-center p-2 text-center"></div>
             </div>
-            <div data-index="4" class="clickable-area absolute top-1/2 left-1/2 w-[34%] h-[34%] border-2 border-black cursor-pointer transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></div>
+            <div data-index="4" class="clickable-area absolute top-1/2 left-1/2 w-[34%] h-[34%] border-2 border-black cursor-pointer transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center p-2 text-center"></div>
         </div>
+        
+        <!-- Voice View -->
+        <div id="voice-view-container" class="hidden w-full h-full flex flex-col items-center justify-center text-center p-8">
+            <button id="mic-btn" class="w-24 h-24 sm:w-32 sm:h-32 bg-gray-200 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg hover:bg-gray-300 focus:outline-none">
+                 <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+            </button>
+            <p id="voice-status" class="mt-8 text-lg text-gray-600 font-semibold">Tekan untuk berbicara</p>
+            <p id="transcript-preview" class="mt-2 text-sm text-gray-400 h-6 italic"></p>
+        </div>
+
         <div id="message-area" class="mt-8 h-10 text-center flex flex-col items-center justify-center">
             <p id="message-text" class="text-lg text-gray-500">Memuat...</p>
         </div>
     </main>
 
     <!-- Settings Modal -->
-    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-8 modal">
-        <div class="bg-white border border-black rounded-lg shadow-xl w-full max-w-md flex flex-col text-black max-h-full">
-            <div class="p-4 border-b border-gray-300 flex justify-between items-center">
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 sm:p-8 modal">
+        <div class="bg-white border border-black rounded-lg shadow-xl w-full max-w-md flex flex-col text-black max-h-[90vh]">
+            <div class="p-4 border-b border-gray-300 flex justify-between items-center flex-shrink-0">
                 <h2 class="text-xl font-bold">Pengaturan</h2>
                 <button id="close-settings-modal-btn" class="p-1 rounded-full hover:bg-gray-200">
                     <img src="https://img.icons8.com/ios-filled/24/000000/delete-sign.png" alt="Tutup" class="w-5 h-5"/>
                 </button>
             </div>
             
-            <div class="p-4 border-b border-gray-300">
-                <h3 class="font-semibold mb-2">Metode Input Utama</h3>
-                <div class="flex flex-col space-y-2">
-                    <label class="flex items-center">
-                        <input type="radio" name="inputMethod" value="grid" class="mr-2" checked>
-                        Tampilan Grid
-                    </label>
-                    <label class="flex items-center text-gray-400 cursor-not-allowed">
-                        <input type="radio" name="inputMethod" value="voice" class="mr-2" disabled>
-                        Pengenalan Suara
-                        <span class="text-xs bg-gray-200 text-gray-500 font-semibold rounded-full px-2 py-0.5 ml-2">Coming Soon</span>
-                    </label>
+            <div class="overflow-y-auto modal-content-area">
+                <div class="p-4 border-b border-gray-300">
+                    <h3 class="font-semibold mb-2">Metode Input Utama</h3>
+                    <div class="flex flex-col space-y-2">
+                        <label class="flex items-center"><input type="radio" name="inputMethod" value="grid" class="mr-2"> Tampilan Grid</label>
+                        <label class="flex items-center"><input type="radio" name="inputMethod" value="voice" class="mr-2"> Pengenalan Suara</label>
+                    </div>
+                    <div id="voice-settings-container" class="hidden mt-4 pt-4 border-t border-gray-200 space-y-3">
+                        <div>
+                            <label for="start-phrase-input" class="block font-medium text-sm mb-1">Kata Pembuka</label>
+                            <input type="text" id="start-phrase-input" class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2">
+                        </div>
+                        <div>
+                            <label for="end-phrase-input" class="block font-medium text-sm mb-1">Kata Penutup</label>
+                            <input type="text" id="end-phrase-input" class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 border-b border-gray-300">
+                    <h3 class="font-semibold mb-2">Prediksikan ke:</h3>
+                    <div class="flex flex-col space-y-2">
+                        <label class="flex items-center"><input type="radio" name="searchEngine" value="maps" class="mr-2"> Google Maps</label>
+                        <label class="flex items-center"><input type="radio" name="searchEngine" value="google" class="mr-2"> Google Search</label>
+                        <label class="flex items-center"><input type="radio" name="searchEngine" value="shortcut" class="mr-2"> Shortcut iOS</label>
+                    </div>
+                    <div id="shortcut-name-container" class="hidden mt-3">
+                        <label for="shortcut-name-input" class="block font-medium text-sm mb-1">Nama Shortcut (Harus Sama Persis)</label>
+                        <input type="text" id="shortcut-name-input" placeholder="Contoh: Proses Prediksi" class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2">
+                    </div>
+                </div>
+
+                <div class="p-4 space-y-3">
+                    <label for="bulk-add-input" class="block font-medium text-sm mb-1">Input Semua Prediksi (pisahkan dengan koma)</label>
+                    <textarea id="bulk-add-input" rows="8" placeholder="Jakarta, Bandung, Surabaya, ..." class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2"></textarea>
                 </div>
             </div>
 
-            <div class="p-4 border-b border-gray-300">
-                <h3 class="font-semibold mb-2">Prediksikan ke:</h3>
-                <div class="flex flex-col space-y-2">
-                    <label class="flex items-center"><input type="radio" name="searchEngine" value="maps" class="mr-2"> Google Maps</label>
-                    <label class="flex items-center"><input type="radio" name="searchEngine" value="google" class="mr-2"> Google Search</label>
-                    <label class="flex items-center"><input type="radio" name="searchEngine" value="shortcut" class="mr-2"> Shortcut iOS</label>
-                </div>
-                <div id="shortcut-name-container" class="hidden mt-3">
-                    <label for="shortcut-name-input" class="block font-medium text-sm mb-1">Nama Shortcut (Harus Sama Persis)</label>
-                    <input type="text" id="shortcut-name-input" placeholder="Contoh: Proses Prediksi" class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black">
-                </div>
-            </div>
-
-            <div class="p-4 space-y-3 overflow-y-auto modal-content-area">
-                <label for="bulk-add-input" class="block font-medium text-sm mb-1">Input Semua Prediksi (pisahkan dengan koma)</label>
-                <textarea id="bulk-add-input" rows="10" placeholder="Jakarta, Bandung, Surabaya, ..." class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"></textarea>
-            </div>
-
-            <div class="p-4 border-t border-gray-300">
+            <div class="p-4 border-t border-gray-300 flex-shrink-0">
                 <button id="save-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded transition-colors">
                     Simpan Perubahan
                 </button>
@@ -133,57 +157,54 @@
         </div>
     </div>
     
-    <!-- UPDATED Instructions Modal -->
-    <div id="instructions-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-8 modal">
-        <div class="bg-white border border-black rounded-lg shadow-xl w-full max-w-md flex flex-col text-black max-h-full">
-            <div class="p-4 border-b border-gray-300 flex justify-between items-center">
+    <!-- REVISED Instructions Modal -->
+    <div id="instructions-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 sm:p-8 modal">
+       <div class="bg-white border border-black rounded-lg shadow-xl w-full max-w-md flex flex-col text-black max-h-[90vh]">
+            <div class="p-4 border-b border-gray-300 flex justify-between items-center flex-shrink-0">
                 <h2 class="text-xl font-bold">Petunjuk Penggunaan</h2>
                 <button id="close-instructions-modal-btn" class="p-1 rounded-full hover:bg-gray-200">
                     <img src="https://img.icons8.com/ios-filled/24/000000/delete-sign.png" alt="Tutup" class="w-5 h-5"/>
                 </button>
             </div>
-             <div class="p-6 space-y-6 text-gray-800 overflow-y-auto modal-content-area">
+             <div class="p-6 space-y-6 overflow-y-auto modal-content-area">
                 <div>
-                    <h3 class="font-semibold text-lg mb-2">Navigasi Utama</h3>
+                    <h3 class="font-semibold text-lg mb-2">Mode Grid</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-sm">
+                        <li>Layar utama menampilkan halaman set (misal: "1-5"). Geser ke kiri/kanan untuk berpindah halaman set.</li>
+                        <li>Tekan sebuah set untuk melihat isinya.</li>
+                        <li>Saat melihat item, geser ke kiri untuk ke set berikutnya, atau geser ke kanan untuk kembali (Undo).</li>
+                    </ol>
+                </div>
+                 <div>
+                    <h3 class="font-semibold text-lg mb-2">Penjelasan Detail Mode Suara</h3>
+                    <p class="text-sm mb-2">Mode Suara menggunakan struktur kalimat khusus untuk memastikan perintah Anda akurat dan untuk menghindari pemicu yang tidak disengaja dari percakapan sekitar.</p>
                     <ol class="list-decimal list-inside space-y-2 text-sm">
                         <li>
-                            <strong>Pilih Halaman Set:</strong> Layar utama menampilkan halaman-halaman yang berisi set prediksi (misal: "1-5", "6-10").
-                            <br>
-                            <span class="font-semibold">Geser ke kiri atau kanan di layar utama</span> untuk berpindah antar halaman jika Anda memiliki lebih dari 5 set.
+                           <strong>Frasa Pemicu:</strong> Aplikasi menunggu Anda mengucapkan kalimat lengkap yang terdiri dari <strong>[Kata Pembuka]</strong> + <strong>[ITEM PREDIKSI]</strong> + <strong>[Kata Penutup]</strong>.
                         </li>
                         <li>
-                            <strong>Masuk ke Set:</strong> <span class="font-semibold">Tekan salah satu set</span> (misal: "6-10") untuk melihat item di dalamnya.
+                           <strong>Cara Menggunakan:</strong>
+                           <ul class="list-disc list-inside ml-4 mt-1">
+                               <li>Tekan tombol mikrofon. Aplikasi akan meminta izin akses mikrofon saat pertama kali digunakan.</li>
+                               <li>Ucapkan kalimat perintah Anda secara lengkap. Contoh default: <br><em class="font-semibold">"Yang kamu pilih adalah Monumen Nasional betul?"</em></li>
+                               <li>Aplikasi akan otomatis mendeteksi item ("Monumen Nasional"), berhenti merekam, dan membuka tujuan Anda.</li>
+                           </ul>
                         </li>
                         <li>
-                            <strong>Navigasi di Dalam Set:</strong> Saat melihat item, <span class="font-semibold">geser ke kiri</span> untuk pindah ke set berikutnya (misal: dari set "6-10" ke "11-15"). <span class="font-semibold">Geser ke kanan</span> untuk kembali ke layar pemilihan set (Undo).
+                           <strong>Kustomisasi:</strong> Anda dapat mengubah "Kata Pembuka" dan "Kata Penutup" sesuai keinginan Anda di menu Pengaturan (⚙️).
                         </li>
                     </ol>
                 </div>
-
                 <div>
-                    <h3 class="font-semibold text-lg mb-2">Pengaturan Aplikasi</h3>
-                     <ol class="list-decimal list-inside space-y-2 text-sm">
-                        <li>
-                           <strong>Metode Input:</strong> Di Pengaturan (⚙️), Anda bisa memilih "Metode Input Utama". Saat ini, hanya "Tampilan Grid" yang tersedia. Fitur <span class="font-semibold">"Pengenalan Suara" akan segera hadir</span>, memungkinkan Anda memilih prediksi dengan suara.
-                        </li>
-                        <li>
-                           <strong>Edit Prediksi:</strong> Untuk menambah atau mengubah daftar, masukkan semua item Anda di kotak teks besar, pisahkan dengan koma. Lalu tekan <span class="font-semibold">"Simpan Perubahan"</span>.
-                        </li>
-                    </ol>
-                </div>
-
-                 <div>
-                    <h3 class="font-semibold text-lg mb-2">Jadikan Aplikasi</h3>
-                    <p class="text-sm">
-                        Aplikasi ini bisa di-install di layar utama Anda. Tekan tombol 'Bagikan' lalu 'Tambahkan ke Layar Utama' (Safari di iOS), atau tekan titik tiga (⋮) lalu 'Tambahkan ke Layar Utama' (Chrome di Android).
-                    </p>
+                    <h3 class="font-semibold text-lg mb-2">Pengaturan</h3>
+                     <p class="text-sm">Di Pengaturan (⚙️), Anda bisa memilih antara mode Grid atau Suara, mengubah frasa suara, mengatur tujuan redirect (Maps, Search, Shortcut), dan mengedit daftar prediksi Anda.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Notification Modal -->
-    <div id="notification-modal" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-80 text-white text-center p-6 rounded-lg shadow-xl z-60 pointer-events-none">
+    <div id="notification-modal" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-80 text-white text-center p-6 rounded-lg z-60">
         <p id="notification-text" class="font-semibold"></p>
     </div>
 
@@ -192,25 +213,22 @@
     </div>
 
     <script>
-        // Registrasi Service Worker untuk PWA
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => console.log('ServiceWorker registration successful.'))
-                    .catch(error => console.log('ServiceWorker registration failed: ', error));
-            });
+            window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js'));
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const STORAGE_KEY = 'magicAppDataV5';
+            const STORAGE_KEY = 'magicAppDataV6';
 
             const defaultData = {
                 settings: { 
                     searchEngine: 'maps', 
                     shortcutName: '',
-                    inputMethod: 'grid'
+                    inputMethod: 'grid',
+                    startPhrase: 'yang kamu pilih adalah',
+                    endPhrase: 'betul'
                 },
-                pages: [ { startNumber: 1, regions: ['Jakarta'] } ]
+                pages: [ { startNumber: 1, regions: ['Monumen Nasional'] } ]
             };
             
             // --- Elements ---
@@ -226,12 +244,18 @@
             const searchEngineRadios = document.querySelectorAll('input[name="searchEngine"]');
             const shortcutNameContainer = document.getElementById('shortcut-name-container');
             const shortcutNameInput = document.getElementById('shortcut-name-input');
-            const swipeContainer = document.getElementById('swipe-container');
             const bulkAddInput = document.getElementById('bulk-add-input');
             const notificationModal = document.getElementById('notification-modal');
             const notificationText = document.getElementById('notification-text');
             const inputMethodRadios = document.querySelectorAll('input[name="inputMethod"]');
-
+            const voiceSettingsContainer = document.getElementById('voice-settings-container');
+            const startPhraseInput = document.getElementById('start-phrase-input');
+            const endPhraseInput = document.getElementById('end-phrase-input');
+            const gridViewContainer = document.getElementById('grid-view-container');
+            const voiceViewContainer = document.getElementById('voice-view-container');
+            const micBtn = document.getElementById('mic-btn');
+            const voiceStatus = document.getElementById('voice-status');
+            const transcriptPreview = document.getElementById('transcript-preview');
 
             // --- State Variables ---
             let appData = {};
@@ -239,6 +263,101 @@
             let setPageIndex = 0;
             let isSetSelectionMode = true;
             let isSingleItemMode = false;
+            let isListening = false;
+
+            // --- Speech Recognition Setup ---
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let recognition;
+
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.lang = 'id-ID';
+                recognition.interimResults = true;
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    micBtn.classList.add('bg-red-500', 'listening-animation');
+                    micBtn.classList.remove('bg-gray-200');
+                    voiceStatus.textContent = 'Mendengarkan...';
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    micBtn.classList.remove('bg-red-500', 'listening-animation');
+                    micBtn.classList.add('bg-gray-200');
+                    voiceStatus.textContent = 'Tekan untuk berbicara';
+                    transcriptPreview.textContent = '';
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    if (event.error === 'not-allowed') {
+                        voiceStatus.textContent = 'Izin mikrofon ditolak.';
+                    } else {
+                        voiceStatus.textContent = 'Error: ' + event.error;
+                    }
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = Array.from(event.results).map(result => result[0]).map(result => result.transcript).join('');
+                    transcriptPreview.textContent = transcript;
+                    const startPhrase = appData.settings.startPhrase.toLowerCase();
+                    const endPhrase = appData.settings.endPhrase.toLowerCase();
+                    const transcriptLower = transcript.toLowerCase();
+                    if (transcriptLower.includes(startPhrase) && transcriptLower.includes(endPhrase)) {
+                        const startIndex = transcriptLower.indexOf(startPhrase) + startPhrase.length;
+                        const endIndex = transcriptLower.lastIndexOf(endPhrase);
+                        if (startIndex < endIndex) {
+                            const keyword = transcript.substring(startIndex, endIndex).trim();
+                            recognition.stop();
+                            findAndExecute(keyword);
+                        }
+                    }
+                };
+            } else {
+                document.querySelector('input[name="inputMethod"][value="voice"]').parentElement.style.display = 'none';
+            }
+            
+            // --- Main Functions ---
+            function findAndExecute(keyword) {
+                const allRegions = appData.pages.flatMap(p => p.regions);
+                let bestMatch = null;
+                let highestScore = 0;
+                const lowerKeyword = keyword.toLowerCase();
+                allRegions.forEach(region => {
+                    const lowerRegion = region.toLowerCase();
+                    let score = 0;
+                    if (lowerRegion === lowerKeyword) score = 100;
+                    else if (lowerRegion.includes(lowerKeyword) || lowerKeyword.includes(lowerRegion)) score = (lowerKeyword.length / lowerRegion.length) * 80;
+                    if (score > highestScore) {
+                        highestScore = score;
+                        bestMatch = region;
+                    }
+                });
+                if (bestMatch) {
+                    voiceStatus.textContent = `Membuka: ${capitalizeFirstLetter(bestMatch)}`;
+                    setTimeout(() => executeAction(bestMatch), 1500);
+                } else {
+                    voiceStatus.textContent = `Tidak ditemukan: "${keyword}"`;
+                }
+            }
+            
+            function executeAction(regionName) {
+                messageText.textContent = `Membuka: ${capitalizeFirstLetter(regionName)}`;
+                messageText.classList.remove('hidden');
+                setTimeout(() => updateMainView(), 2500);
+                const { searchEngine, shortcutName } = appData.settings;
+                let url = '';
+                if (searchEngine === 'shortcut') {
+                    if (!shortcutName) { messageText.textContent = 'Nama Shortcut belum diatur!'; return; }
+                    url = `shortcuts://run-shortcut?name=${encodeURIComponent(shortcutName)}&input=${encodeURIComponent(regionName)}`; 
+                    window.location.href = url;
+                } else {
+                    url = (searchEngine === 'maps') ? `https://maps.google.com/?q=${encodeURIComponent(regionName)}` : `https://www.google.com/search?q=${encodeURIComponent(regionName)}`;
+                    openInExternalBrowser(url);
+                }
+            }
             
             // --- Helper Functions ---
             function capitalizeFirstLetter(string) {
@@ -255,26 +374,34 @@
                 const storedData = localStorage.getItem(STORAGE_KEY);
                 try {
                     const parsedData = JSON.parse(storedData);
-                    if (parsedData && parsedData.settings && parsedData.pages && parsedData.pages.length > 0) {
-                        if (!parsedData.settings.hasOwnProperty('shortcutName')) parsedData.settings.shortcutName = '';
-                        if (!parsedData.settings.hasOwnProperty('inputMethod')) parsedData.settings.inputMethod = 'grid';
-                        return parsedData;
+                    if (parsedData && parsedData.settings && parsedData.pages) {
+                        return { ...defaultData, ...parsedData, settings: { ...defaultData.settings, ...parsedData.settings } };
                     }
                     return defaultData;
                 } catch (e) { return defaultData; }
             }
 
             function saveDataToStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
+            
+            function updateMainView() {
+                if (appData.settings.inputMethod === 'voice') {
+                    voiceViewContainer.classList.remove('hidden');
+                    gridViewContainer.classList.add('hidden');
+                    messageText.classList.add('hidden');
+                } else {
+                    voiceViewContainer.classList.add('hidden');
+                    gridViewContainer.classList.remove('hidden');
+                    updateGridView();
+                }
+            }
 
-            function updateDisplay() {
+            function updateGridView() {
                 if (!appData.pages || appData.pages.length === 0) return;
-                
                 isSingleItemMode = appData.pages.length === 1 && appData.pages[0].regions.length === 1;
-
                 if (isSingleItemMode) {
                     messageText.classList.add('hidden');
                     const regionName = appData.pages[0].regions[0];
-                    const singleItemHTML = `<div class="content-container w-full h-full flex items-center justify-center"><span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black opacity-10 text-[80px] sm-text-[110px] font-black pointer-events-none z-0">1</span><span class="relative z-10 font-semibold text-2xl sm:text-4xl">${capitalizeFirstLetter(regionName)}</span></div>`;
+                    const singleItemHTML = `<div class="content-container w-full h-full flex items-center justify-center text-center"><span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black opacity-10 text-6xl sm:text-8xl font-black z-0">1</span><span class="relative z-10 font-semibold text-xl sm:text-3xl">${capitalizeFirstLetter(regionName)}</span></div>`;
                     clickableAreas.forEach(area => { area.innerHTML = singleItemHTML; });
                 } else if (isSetSelectionMode) {
                     messageText.textContent = "Pilih Set Prediksi";
@@ -282,21 +409,20 @@
                     const setsPerPage = 5;
                     const startIndex = setPageIndex * setsPerPage;
                     clickableAreas.forEach((area, index) => {
-                        const pageIndex = startIndex + index;
-                        const page = appData.pages[pageIndex];
+                        const page = appData.pages[startIndex + index];
                         if (page && page.regions.length > 0) {
                             const start = page.startNumber; const end = start + page.regions.length - 1;
-                             area.innerHTML = `<div class="content-container w-full h-full flex items-center justify-center"><span class="relative z-10 font-black text-4xl sm:text-6xl">${start}-${end}</span></div>`;
+                             area.innerHTML = `<div class="content-container w-full h-full flex items-center justify-center text-center"><span class="relative z-10 font-black text-3xl sm:text-5xl">${start}-${end}</span></div>`;
                         } else { area.innerHTML = ''; }
                     });
-                } else { // In prediction mode
+                } else {
                     const currentPage = appData.pages[currentPageIndex];
-                    if (!currentPage) { isSetSelectionMode = true; updateDisplay(); return; }
+                    if (!currentPage) { isSetSelectionMode = true; updateGridView(); return; }
                     messageText.classList.add('hidden');
                     clickableAreas.forEach((area, index) => {
-                        const regionName = currentPage.regions[index] || ''; const number = currentPage.startNumber + index;
+                        const regionName = currentPage.regions[index] || '';
                         const formattedName = capitalizeFirstLetter(regionName);
-                        area.innerHTML = regionName ? `<div class="content-container w-full h-full flex items-center justify-center"><span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black opacity-10 text-[80px] sm:text-[110px] font-black pointer-events-none z-0">${number}</span><span class="relative z-10 font-semibold text-lg sm:text-2xl">${formattedName}</span></div>` : '';
+                        area.innerHTML = regionName ? `<div class="content-container w-full h-full flex items-center justify-center text-center"><span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black opacity-10 text-6xl sm:text-8xl font-black z-0">${currentPage.startNumber + index}</span><span class="relative z-10 font-semibold text-base sm:text-xl">${formattedName}</span></div>` : '';
                     });
                 }
             }
@@ -310,120 +436,106 @@
                 }, 2000);
             }
 
-            function handleSearchEngineChange() {
-                const selectedEngine = document.querySelector('input[name="searchEngine"]:checked').value;
-                shortcutNameContainer.classList.toggle('hidden', selectedEngine !== 'shortcut');
-            }
-
             function populateSettingsModal() {
                 document.querySelector(`input[name="inputMethod"][value="${appData.settings.inputMethod}"]`).checked = true;
                 document.querySelector(`input[name="searchEngine"][value="${appData.settings.searchEngine}"]`).checked = true;
                 shortcutNameInput.value = appData.settings.shortcutName || '';
-                handleSearchEngineChange();
+                startPhraseInput.value = appData.settings.startPhrase;
+                endPhraseInput.value = appData.settings.endPhrase;
+                voiceSettingsContainer.classList.toggle('hidden', appData.settings.inputMethod !== 'voice');
+                shortcutNameContainer.classList.toggle('hidden', appData.settings.searchEngine !== 'shortcut');
                 const allRegions = appData.pages.flatMap(page => page.regions);
                 bulkAddInput.value = allRegions.join(', ');
             }
             
-            searchEngineRadios.forEach(radio => radio.addEventListener('change', handleSearchEngineChange));
-
+            // --- Event Listeners ---
             openSettingsBtn.addEventListener('click', () => { populateSettingsModal(); settingsModal.classList.remove('hidden'); });
             closeSettingsModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
             openInstructionsBtn.addEventListener('click', () => instructionsModal.classList.remove('hidden'));
             closeInstructionsModalBtn.addEventListener('click', () => instructionsModal.classList.add('hidden'));
+            
+            inputMethodRadios.forEach(radio => radio.addEventListener('change', (e) => {
+                voiceSettingsContainer.classList.toggle('hidden', e.target.value !== 'voice');
+            }));
+            
+            searchEngineRadios.forEach(radio => radio.addEventListener('change', (e) => {
+                shortcutNameContainer.classList.toggle('hidden', e.target.value !== 'shortcut');
+            }));
+
+            micBtn.addEventListener('click', () => {
+                if (!isListening) {
+                    try { recognition.start(); } catch(e) { console.error("Could not start recognition:", e); }
+                } else {
+                    recognition.stop();
+                }
+            });
 
             saveBtn.addEventListener('click', () => {
                 appData.settings.inputMethod = document.querySelector('input[name="inputMethod"]:checked').value;
                 appData.settings.searchEngine = document.querySelector('input[name="searchEngine"]:checked').value;
                 appData.settings.shortcutName = shortcutNameInput.value.trim();
+                appData.settings.startPhrase = startPhraseInput.value.trim();
+                appData.settings.endPhrase = endPhraseInput.value.trim();
                 
                 const allRegions = bulkAddInput.value.split(',').map(item => item.trim()).filter(Boolean);
-                const newPages = []; let currentNumber = 1;
+                const newPages = [];
                 for (let i = 0; i < allRegions.length; i += 5) {
-                    const regionChunk = allRegions.slice(i, i + 5);
-                    newPages.push({ startNumber: currentNumber, regions: regionChunk });
-                    currentNumber = i + 5 + 1;
+                    newPages.push({ startNumber: i + 1, regions: allRegions.slice(i, i + 5) });
                 }
                 appData.pages = newPages.length > 0 ? newPages : [defaultData.pages[0]];
                 saveDataToStorage();
                 isSetSelectionMode = true; 
                 setPageIndex = 0;
-                updateDisplay();
+                updateMainView();
                 settingsModal.classList.add('hidden');
                 showNotification("Perubahan disimpan!");
             });
 
-            clickableAreas.forEach(area => {
-                area.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    const areaIndexOnScreen = parseInt(area.dataset.index);
-                    let regionName;
-
-                    if (isSingleItemMode) {
-                        regionName = appData.pages[0].regions[0];
-                    } else if (isSetSelectionMode) {
-                        const actualSetIndex = (setPageIndex * 5) + areaIndexOnScreen;
-                        if (appData.pages[actualSetIndex]) { 
-                            currentPageIndex = actualSetIndex; 
-                            isSetSelectionMode = false; 
-                            changePage(); 
-                        }
-                        return;
-                    } else {
-                        regionName = appData.pages[currentPageIndex]?.regions[areaIndexOnScreen];
+            gridViewContainer.addEventListener('click', (event) => {
+                const area = event.target.closest('.clickable-area');
+                if (!area) return;
+                const areaIndexOnScreen = parseInt(area.dataset.index);
+                let regionName;
+                if (isSingleItemMode) {
+                    regionName = appData.pages[0].regions[0];
+                } else if (isSetSelectionMode) {
+                    const actualSetIndex = (setPageIndex * 5) + areaIndexOnScreen;
+                    if (appData.pages[actualSetIndex]) { 
+                        currentPageIndex = actualSetIndex; 
+                        isSetSelectionMode = false; 
+                        changePage(); 
                     }
-
-                    if (!regionName) return;
-                    
-                    messageText.textContent = `Membuka: ${capitalizeFirstLetter(regionName)}`; 
-                    messageText.classList.remove('hidden');
-                    setTimeout(() => { updateDisplay(); }, 2500);
-                    const searchEngine = appData.settings.searchEngine; let url = '';
-                    if (searchEngine === 'shortcut') {
-                        const shortcutName = appData.settings.shortcutName;
-                        if (!shortcutName) { messageText.textContent = 'Nama Shortcut belum diatur!'; return; }
-                        url = `shortcuts://run-shortcut?name=${encodeURIComponent(shortcutName)}&input=${encodeURIComponent(regionName)}`; 
-                        window.location.href = url;
-                    } else {
-                        url = (searchEngine === 'maps') ? `https://maps.google.com/?q=${encodeURIComponent(regionName)}` : `https://www.google.com/search?q=${encodeURIComponent(regionName)}`;
-                        openInExternalBrowser(url);
-                    }
-                });
+                    return;
+                } else {
+                    regionName = appData.pages[currentPageIndex]?.regions[areaIndexOnScreen];
+                }
+                if (regionName) executeAction(regionName);
             });
 
             let touchStartX = 0;
-            swipeContainer.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-            swipeContainer.addEventListener('touchend', (e) => {
+            gridViewContainer.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+            gridViewContainer.addEventListener('touchend', (e) => {
                 if (isSingleItemMode) return;
                 const deltaX = e.changedTouches[0].screenX - touchStartX; 
                 const swipeThreshold = 50;
                 if (isSetSelectionMode) {
                     const maxSetPageIndex = Math.ceil(appData.pages.length / 5) - 1;
-                    if (deltaX < -swipeThreshold && setPageIndex < maxSetPageIndex) {
-                        setPageIndex++;
-                        changePage();
-                    } else if (deltaX > swipeThreshold && setPageIndex > 0) {
-                        setPageIndex--;
-                        changePage();
-                    }
-                } else { // In prediction mode
-                    if (deltaX < -swipeThreshold && currentPageIndex < appData.pages.length - 1) { 
-                        currentPageIndex++;
-                        changePage();
-                    } else if (deltaX > swipeThreshold) { 
-                        isSetSelectionMode = true; 
-                        setPageIndex = Math.floor(currentPageIndex / 5);
-                        changePage();
-                    }
+                    if (deltaX < -swipeThreshold && setPageIndex < maxSetPageIndex) { setPageIndex++; changePage(); } 
+                    else if (deltaX > swipeThreshold && setPageIndex > 0) { setPageIndex--; changePage(); }
+                } else {
+                    if (deltaX < -swipeThreshold && currentPageIndex < appData.pages.length - 1) { currentPageIndex++; changePage(); } 
+                    else if (deltaX > swipeThreshold) { isSetSelectionMode = true; setPageIndex = Math.floor(currentPageIndex / 5); changePage(); }
                 }
             });
 
             function changePage() {
                 document.querySelectorAll('.content-container').forEach(el => el.classList.add('fade-out'));
-                setTimeout(() => { updateDisplay(); }, 200);
+                setTimeout(() => { updateGridView(); }, 200);
             }
 
+            // --- Initial Load ---
             appData = loadDataFromStorage();
-            updateDisplay();
+            updateMainView();
         });
     </script>
 </body>

@@ -4,15 +4,23 @@
     <meta charset="UTF-8">
     <title>Maps Prediction</title>
     
+    <!-- PWA & Mobile Optimization Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-    <meta name="theme-color" content="#ffffff">
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- iOS Specific Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Maps Prediction">
+    <meta name="apple-mobile-web-app-title" content="Maps Pred">
     <link rel="apple-touch-icon" href="https://img.icons8.com/parakeet-line/180/map-marker.png">
     
+    <!-- Catatan: Untuk splash screen di iOS, Anda perlu membuat gambar untuk setiap ukuran layar.
+         Ini adalah contoh. Hapus komentar dan ganti 'splash.png' jika Anda membuatnya.
+    <link rel="apple-touch-startup-image" href="/splash.png">
+    -->
+
+    <!-- Fonts and Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,16 +47,9 @@
         .modal {
             z-index: 50;
         }
-        .modal-content-area::-webkit-scrollbar {
-            width: 8px;
-        }
-        .modal-content-area::-webkit-scrollbar-track {
-            background: #e2e8f0;
-        }
-        .modal-content-area::-webkit-scrollbar-thumb {
-            background: #a0aec0;
-            border-radius: 4px;
-        }
+        .modal-content-area::-webkit-scrollbar { width: 8px; }
+        .modal-content-area::-webkit-scrollbar-track { background: #e2e8f0; }
+        .modal-content-area::-webkit-scrollbar-thumb { background: #a0aec0; border-radius: 4px; }
     </style>
 </head>
 <body class="bg-white text-black">
@@ -78,8 +79,8 @@
             </div>
             <div data-index="4" class="clickable-area absolute top-1/2 left-1/2 w-[34%] h-[34%] border-2 border-black cursor-pointer transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"></div>
         </div>
-        <div class="mt-8 h-8 text-center">
-            <p id="message-text" class="text-lg text-gray-500">Pilih Prediksi</p>
+        <div id="message-area" class="mt-8 h-10 text-center flex flex-col items-center justify-center">
+            <p id="message-text" class="text-lg text-gray-500">Memuat...</p>
         </div>
     </main>
 
@@ -127,21 +128,23 @@
             <div class="p-6 space-y-5 text-gray-800 overflow-y-auto modal-content-area">
                 <div>
                     <strong>Cara Kerja:</strong>
-                    <p class="mt-1">Aplikasi ini akan membuka otomatis Google Maps atau Google Search sesuai area yang Anda tekan. Prediksi akan ditampilkan per 5 item. Untuk menampilkan item ke-6 dan seterusnya, bisa dengan menggeser (swipe) ke kanan atau ke kiri.</p>
+                    <p class="mt-1">Aplikasi ini memiliki dua mode: <strong>Pilih Set</strong> dan <strong>Mode Prediksi</strong>.</p>
+                     <ol class="list-decimal list-inside mt-2 space-y-1 text-sm">
+                        <li>Saat pertama dibuka, Anda akan melihat set-set prediksi yang tersedia (misal: "1-5", "6-10").</li>
+                        <li>Tekan salah satu set untuk masuk ke Mode Prediksi dan melihat item di dalamnya.</li>
+                        <li>Tekan item yang diinginkan untuk membuka Google Maps/Search/Shortcut.</li>
+                        <li>Untuk navigasi, geser ke kiri untuk melihat set berikutnya. <strong>Geser ke kanan untuk kembali ke Pilihan Set (Undo).</strong></li>
+                    </ol>
                 </div>
                 <div>
                     <strong>Integrasi Lanjutan: Shortcut iOS</strong>
                     <p class="mt-1">Anda bisa menghubungkan aplikasi ini dengan aplikasi Pintasan (Shortcuts) di perangkat iOS untuk aksi yang sepenuhnya kustom. Cara Mengaturnya:</p>
                     <ol class="list-decimal list-inside mt-2 space-y-1 text-sm">
                         <li><strong>Buat Pintasan di iOS:</strong> Buka aplikasi Pintasan, buat pintasan baru.</li>
-                        <li><strong>Aktifkan Input:</strong> Di dalam editor pintasan, ketuk `i` atau nama pintasan, lalu aktifkan "Tampilkan di Lembar Berbagi". Ini penting agar pintasan siap menerima teks.</li>
-                        <li><strong>Gunakan Input:</strong> Gunakan variabel "Input Pintasan" di dalam aksi Anda (misalnya, untuk menampilkan notifikasi).</li>
+                        <li><strong>Aktifkan Input:</strong> Di dalam editor pintasan, ketuk `i` atau nama pintasan, lalu aktifkan "Tampilkan di Lembar Berbagi".</li>
+                        <li><strong>Gunakan Input:</strong> Gunakan variabel "Input Pintasan" di dalam aksi Anda.</li>
                         <li><strong>Atur di Aplikasi:</strong> Buka Pengaturan (⚙️), pilih "Shortcut iOS", dan masukkan nama Pintasan Anda <em>dengan sama persis</em>.</li>
                     </ol>
-                </div>
-                <div>
-                    <strong>Tips:</strong>
-                    <p class="mt-1">Gunakan fitur "Prediksikan ke" di dalam pengaturan untuk memilih ingin menampilkan prediksi di Google Maps, Google Search, atau menjalankan Shortcut iOS.</p>
                 </div>
                  <div>
                     <strong>Jadikan Aplikasi:</strong>
@@ -156,17 +159,17 @@
     </div>
 
     <script>
-        // Registrasi Service Worker
+        // Registrasi Service Worker untuk PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
+                navigator.serviceWorker.register('service-worker.js')
                     .then(registration => console.log('ServiceWorker registration successful.'))
                     .catch(error => console.log('ServiceWorker registration failed: ', error));
             });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const STORAGE_KEY = 'magicAppDataV3'; // Version up to avoid conflicts
+            const STORAGE_KEY = 'magicAppDataV3'; 
 
             const defaultData = {
                 settings: { searchEngine: 'maps', shortcutName: '' },
@@ -176,7 +179,7 @@
                 ]
             };
             
-            // Elements...
+            // --- Elements ---
             const clickableAreas = document.querySelectorAll('.clickable-area');
             const messageText = document.getElementById('message-text');
             const openSettingsBtn = document.getElementById('open-settings-btn');
@@ -191,12 +194,13 @@
             const searchEngineRadios = document.querySelectorAll('input[name="searchEngine"]');
             const shortcutNameContainer = document.getElementById('shortcut-name-container');
             const shortcutNameInput = document.getElementById('shortcut-name-input');
+            const swipeContainer = document.getElementById('swipe-container');
 
-
+            // --- State Variables ---
             let appData = {};
             let currentPageIndex = 0;
+            let isSetSelectionMode = true;
 
-            // --- FUNGSI BARU UNTUK MEMBUKA DI BROWSER EKSTERNAL ---
             function openInExternalBrowser(url) {
                 const a = document.createElement('a');
                 a.href = url;
@@ -229,17 +233,44 @@
 
             function updateDisplay() {
                  if (!appData.pages || appData.pages.length === 0) return;
-                const currentPage = appData.pages[currentPageIndex];
-                if (!currentPage) return;
-                clickableAreas.forEach((area, index) => {
-                    const regionName = currentPage.regions[index] || '';
-                    const number = currentPage.startNumber + index;
-                    area.innerHTML = regionName ? `
-                        <div class="content-container w-full h-full flex items-center justify-center">
-                            <span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black opacity-10 text-[80px] sm:text-[110px] font-black pointer-events-none z-0">${number}</span>
-                            <span class="relative z-10 font-semibold text-lg sm:text-2xl">${regionName}</span>
-                        </div>` : '';
-                });
+
+                if (isSetSelectionMode) {
+                    messageText.textContent = "Pilih Set Prediksi";
+                    messageText.classList.remove('hidden');
+
+                    clickableAreas.forEach((area, index) => {
+                        const page = appData.pages[index];
+                        if (page && page.regions.length > 0) {
+                            const start = page.startNumber;
+                            const end = start + page.regions.length - 1;
+                             area.innerHTML = `
+                                <div class="content-container w-full h-full flex items-center justify-center">
+                                    <span class="relative z-10 font-black text-4xl sm:text-6xl">${start}-${end}</span>
+                                </div>`;
+                        } else {
+                            area.innerHTML = '';
+                        }
+                    });
+
+                } else {
+                    const currentPage = appData.pages[currentPageIndex];
+                    if (!currentPage) { 
+                        isSetSelectionMode = true;
+                        updateDisplay();
+                        return;
+                    }
+                    messageText.classList.add('hidden');
+
+                    clickableAreas.forEach((area, index) => {
+                        const regionName = currentPage.regions[index] || '';
+                        const number = currentPage.startNumber + index;
+                        area.innerHTML = regionName ? `
+                            <div class="content-container w-full h-full flex items-center justify-center">
+                                <span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black opacity-10 text-[80px] sm:text-[110px] font-black pointer-events-none z-0">${number}</span>
+                                <span class="relative z-10 font-semibold text-lg sm:text-2xl">${regionName}</span>
+                            </div>` : '';
+                    });
+                }
             }
 
             function createRegionInput(regionName = '') {
@@ -261,11 +292,7 @@
 
             function handleSearchEngineChange() {
                 const selectedEngine = document.querySelector('input[name="searchEngine"]:checked').value;
-                if (selectedEngine === 'shortcut') {
-                    shortcutNameContainer.classList.remove('hidden');
-                } else {
-                    shortcutNameContainer.classList.add('hidden');
-                }
+                shortcutNameContainer.classList.toggle('hidden', selectedEngine !== 'shortcut');
             }
 
             function populateSettingsModal() {
@@ -308,61 +335,77 @@
                 appData.pages = newPages.length > 0 ? newPages : defaultData.pages;
                 saveDataToStorage();
                 
-                currentPageIndex = 0;
+                isSetSelectionMode = true; 
                 updateDisplay();
                 settingsModal.classList.add('hidden');
                 messageText.textContent = "Disimpan!";
-                setTimeout(() => { messageText.textContent = "Pilih Prediksi"; }, 2000);
+                setTimeout(() => { updateDisplay(); }, 2000);
             });
 
             clickableAreas.forEach(area => {
                 area.addEventListener('click', (event) => {
                     event.stopPropagation();
                     const areaIndex = parseInt(area.dataset.index);
-                    const regionName = appData.pages[currentPageIndex]?.regions[areaIndex];
                     
-                    if (!regionName) return;
-
-                    messageText.textContent = `Prediksi: ${regionName}`;
-                    const searchEngine = appData.settings.searchEngine;
-                    let url = '';
-
-                    // --- BLOK LOGIKA YANG DIPERBARUI ---
-                    if (searchEngine === 'shortcut') {
-                        const shortcutName = appData.settings.shortcutName;
-                        if (!shortcutName) {
-                            messageText.textContent = 'Nama Shortcut belum diatur!';
-                            return;
+                    if (isSetSelectionMode) {
+                        if (appData.pages[areaIndex]) {
+                            currentPageIndex = areaIndex;
+                            isSetSelectionMode = false;
+                            changePage(currentPageIndex);
                         }
-                        const encodedShortcutName = encodeURIComponent(shortcutName);
-                        const encodedInput = encodeURIComponent(regionName);
-                        url = `shortcuts://run-shortcut?name=${encodedShortcutName}&input=${encodedInput}`;
-                        // Skema URL khusus seperti shortcuts:// harus tetap menggunakan cara ini
-                        window.location.href = url;
                     } else {
-                        const encodedQuery = encodeURIComponent(regionName);
-                        if (searchEngine === 'maps') {
-                            url = `https://maps.google.com/?q=${encodedQuery}`;
-                        } else { // google
-                            url = `https://www.google.com/search?q=${encodedQuery}`;
+                        const regionName = appData.pages[currentPageIndex]?.regions[areaIndex];
+                        if (!regionName) return;
+
+                        messageText.textContent = `Membuka: ${regionName}`;
+                        messageText.classList.remove('hidden');
+                        
+                        setTimeout(() => {
+                           if (!isSetSelectionMode) {
+                               messageText.classList.add('hidden');
+                           } else {
+                               messageText.textContent = "Pilih Set Prediksi";
+                               messageText.classList.remove('hidden');
+                           }
+                        }, 2500);
+
+                        const searchEngine = appData.settings.searchEngine;
+                        let url = '';
+
+                        if (searchEngine === 'shortcut') {
+                            const shortcutName = appData.settings.shortcutName;
+                            if (!shortcutName) {
+                                messageText.textContent = 'Nama Shortcut belum diatur!';
+                                return;
+                            }
+                            const encodedShortcutName = encodeURIComponent(shortcutName);
+                            const encodedInput = encodeURIComponent(regionName);
+                            url = `shortcuts://run-shortcut?name=${encodedShortcutName}&input=${encodedInput}`;
+                            window.location.href = url;
+                        } else {
+                            const encodedQuery = encodeURIComponent(regionName);
+                            url = (searchEngine === 'maps')
+                                ? `https://maps.google.com/?q=${encodedQuery}`
+                                : `https://www.google.com/search?q=${encodedQuery}`;
+                            openInExternalBrowser(url);
                         }
-                        // Panggil fungsi baru untuk membuka di browser eksternal
-                        openInExternalBrowser(url);
                     }
                 });
             });
 
-            // Swipe logic...
             let touchStartX = 0;
-            const swipeContainer = document.getElementById('swipe-container');
             swipeContainer.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
             swipeContainer.addEventListener('touchend', (e) => {
+                if (isSetSelectionMode) return; 
+
                 const deltaX = e.changedTouches[0].screenX - touchStartX;
                 const swipeThreshold = 50;
+                
                 if (deltaX < -swipeThreshold && currentPageIndex < appData.pages.length - 1) {
                     changePage(currentPageIndex + 1);
-                } else if (deltaX > swipeThreshold && currentPageIndex > 0) {
-                    changePage(currentPageIndex - 1);
+                } else if (deltaX > swipeThreshold) {
+                    isSetSelectionMode = true;
+                    changePage(currentPageIndex);
                 }
             });
 

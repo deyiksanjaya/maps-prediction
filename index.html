@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Maps Prediction</title>
+    <title>Maps Prediction by Heri Sanjaya</title>
     
     <!-- PWA & Mobile Optimization Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,8 +12,8 @@
     <!-- iOS Specific Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Maps Pred">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/parakeet-line/180/map-marker.png">
+    <meta name="apple-mobile-web-app-title" content="Prediksi Sulap">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/external-flaticons-lineal-color-flat-icons/180/external-magic-hat-circus-flaticons-lineal-color-flat-icons.png">
     
     <!-- Fonts and Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -88,7 +88,7 @@
     <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 sm:p-8 modal">
         <div class="bg-white border border-black rounded-lg shadow-xl w-full max-w-md flex flex-col text-black max-h-[90vh]">
             <div class="p-4 border-b border-gray-300 flex justify-between items-center flex-shrink-0">
-                <h2 class="text-xl font-bold">Pengaturan</h2>
+                <h2 class="text-xl font-bold">Pengaturan Rahasia</h2>
                 <button id="close-settings-modal-btn" class="p-1 rounded-full hover:bg-gray-200">
                     <img src="https://img.icons8.com/ios-filled/24/000000/delete-sign.png" alt="Tutup" class="w-5 h-5"/>
                 </button>
@@ -96,7 +96,7 @@
             
             <div class="overflow-y-auto modal-content-area">
                 <div class="p-4 border-b border-gray-300">
-                    <h3 class="font-semibold mb-2">Prediksikan ke:</h3>
+                    <h3 class="font-semibold mb-2">Buka Prediksi di:</h3>
                     <div class="flex flex-col space-y-2">
                         <label class="flex items-center"><input type="radio" name="searchEngine" value="maps" class="mr-2"> Google Maps</label>
                         <label class="flex items-center"><input type="radio" name="searchEngine" value="google" class="mr-2"> Google Search</label>
@@ -109,7 +109,7 @@
                 </div>
 
                 <div class="p-4 space-y-3">
-                    <label for="bulk-add-input" class="block font-medium text-sm mb-1">Daftar Prediksi (pisahkan dengan koma)</label>
+                    <label for="bulk-add-input" class="block font-medium text-sm mb-1">Daftar Item Prediksi (pisahkan dengan koma)</label>
                     <textarea id="bulk-add-input" rows="8" placeholder="Jakarta, Bandung, Surabaya, ..." class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2"></textarea>
                 </div>
             </div>
@@ -126,57 +126,53 @@
     <div id="instructions-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 sm:p-8 modal">
        <div class="bg-white border border-black rounded-lg shadow-xl w-full max-w-md flex flex-col text-black max-h-[90vh]">
             <div class="p-4 border-b border-gray-300 flex justify-between items-center flex-shrink-0">
-                <h2 class="text-xl font-bold">Petunjuk Penggunaan</h2>
+                <h2 class="text-xl font-bold">Panduan Performa Sulap</h2>
                 <button id="close-instructions-modal-btn" class="p-1 rounded-full hover:bg-gray-200">
                     <img src="https://img.icons8.com/ios-filled/24/000000/delete-sign.png" alt="Tutup" class="w-5 h-5"/>
                 </button>
             </div>
              <div class="p-6 space-y-4 overflow-y-auto modal-content-area">
                 <div>
-                    <h3 class="font-semibold text-lg mb-2">Selamat Datang!</h3>
-                    <p class="text-sm">Aplikasi ini dirancang untuk akses cepat ke lokasi favorit Anda. Berikut cara kerjanya:</p>
+                    <h3 class="font-semibold text-lg mb-2">Efek Pertunjukan</h3>
+                    <p class="text-sm">Anda memulai dengan berkata, "Saya sudah punya satu prediksi di Google Maps." Setelah penonton menyebutkan satu lokasi secara bebas, Anda menunjukkan layar ponsel Anda, dan ternyata Google Maps menampilkan lokasi yang sama persis dengan yang baru saja mereka sebutkan.</p>
                 </div>
                 
                 <div>
-                    <h4 class="font-semibold text-md mt-4 mb-2">1. Konsep Utama: Set & Item</h4>
-                    <ul class="list-disc list-inside space-y-2 text-sm">
-                        <li><strong>Item:</strong> Adalah satu lokasi tujuan Anda (misal: "Pantai Kuta").</li>
-                        <li><strong>Set:</strong> Adalah kumpulan dari 5 Item. Jika Anda punya 15 item, maka akan ada 3 Set (Set 1-5, Set 6-10, Set 11-15). Konsep ini membantu navigasi agar tidak terlalu ramai.</li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-semibold text-md mt-4 mb-2">2. Alur Penggunaan</h4>
-                    <ol class="list-decimal list-inside space-y-3 text-sm">
+                    <h4 class="font-semibold text-md mt-4 mb-2">Metode Rahasia: Alur Performa</h4>
+                    <ol class="list-decimal list-inside space-y-3 text-sm mt-3">
                         <li>
-                            <strong>Pilih Set:</strong> Layar awal akan menampilkan pilihan Set ("1-5", "6-10", dst.).
-                            <br>
-                            <em class="text-gray-600">Geser (swipe) ke kiri atau kanan untuk melihat halaman Set lainnya jika tersedia.</em>
+                            <strong>Langkah 1: Persiapan Awal</strong>
+                            <p>Sebelum memulai, buka aplikasi ini. Anda akan melihat layar "Pilih Grup Prediksi" ("1-5", "6-10", dst). Ini adalah posisi siap Anda.</p>
                         </li>
                         <li>
-                            <strong>Pilih Item:</strong> Ketuk salah satu kotak Set untuk melihat 5 item di dalamnya.
+                            <strong>Langkah 2: Dapatkan Pilihan Penonton</strong>
+                            <p>Sampaikan kalimat pembuka Anda dan minta penonton untuk <strong>menyebutkan</strong> satu lokasi dari daftar yang sudah Anda siapkan.</p>
                         </li>
                         <li>
-                            <strong>Buka Lokasi:</strong> Setelah melihat item, ketuk item yang Anda inginkan untuk membukanya di aplikasi pilihan Anda (Google Maps, dll).
-                        </li>
-                        <li>
-                            <strong>Navigasi Cepat (Saat Melihat Item):</strong>
-                             <ul class="list-disc list-inside ml-4 mt-2 text-gray-600 space-y-1">
-                                <li><strong>Geser ke Kiri:</strong> Langsung lanjut ke Set berikutnya tanpa harus kembali.</li>
-                                <li><strong>Geser ke Kanan:</strong> Kembali ke tampilan pilihan Set (Undo).</li>
+                            <strong>Langkah 3: Aksi Rahasia Anda</strong>
+                            <p>Saat penonton menyebutkan pilihan mereka (misal: "Ubud"), Anda melakukan input rahasia di ponsel Anda:</p>
+                             <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                                <li>Cari Grup yang berisi "Ubud" (misal, Grup "6-10").</li>
+                                <li>Ketuk Grup "6-10".</li>
+                                <li>Lima item akan muncul. Ketuk "Ubud".</li>
                             </ul>
+                        </li>
+                        <li>
+                            <strong>Langkah 4: Revelation</strong>
+                            <p>Aplikasi akan langsung membuka Google Maps ke lokasi yang benar. Tunjukkan layar ini kepada penonton sebagai bukti prediksi Anda akurat.</p>
                         </li>
                     </ol>
                 </div>
 
                 <div>
-                    <h4 class="font-semibold text-md mt-4 mb-2">3. Pengaturan</h4>
-                     <p class="text-sm">Tekan ikon gerigi <img src="https://img.icons8.com/ios-glyphs/16/000000/settings.png" alt="settings icon" class="inline h-4 w-4 mx-1"> di pojok kiri atas untuk:
+                    <h4 class="font-semibold text-md mt-4 mb-2">Persiapan Sebelum Tampil</h4>
+                     <p class="text-sm">Tekan ikon gerigi <img src="https://img.icons8.com/ios-glyphs/16/000000/settings.png" alt="settings icon" class="inline h-4 w-4 mx-1"> untuk mengatur trik Anda:
                         <ul class="list-disc list-inside space-y-1 text-sm mt-2">
-                            <li>Mengubah atau menambah daftar lokasi favorit Anda.</li>
-                            <li>Memilih aplikasi tujuan (Google Maps, Google Search, atau Shortcut iOS).</li>
+                            <li><strong>Isi Daftar Prediksi:</strong> Masukkan semua kemungkinan lokasi yang akan Anda gunakan.</li>
+                            <li><strong>Pilih Cara Prediksi Dibuka:</strong> Atur apakah prediksi akan muncul di Google Maps, Google Search, atau Shortcut iOS.</li>
                         </ul>
                     </p>
+                    <p class="text-sm mt-3 font-semibold">Berlatihlah melakukan aksi rahasia dengan cepat dan tidak terlihat. Selamat memukau penonton Anda!</p>
                 </div>
             </div>
         </div>
@@ -197,9 +193,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const STORAGE_KEY = 'magicAppDataV8_GridOnly_Bali'; // Changed key to serve new default data
+            const STORAGE_KEY = 'magicAppDataV8_GridOnly_Bali'; 
 
-            // --- NEW: Default placeholder data with Bali locations ---
             const defaultData = {
                 settings: { 
                     searchEngine: 'maps', 
@@ -251,7 +246,7 @@
                     url = (searchEngine === 'maps') ? `https://maps.google.com/?q=${encodeURIComponent(regionName)}` : `https://www.google.com/search?q=${encodeURIComponent(regionName)}`;
                 }
                 openInExternalBrowser(url);
-                messageText.textContent = `Membuka: ${capitalizeFirstLetter(regionName)}`;
+                messageText.textContent = `Membuka Prediksi: ${capitalizeFirstLetter(regionName)}`;
                 messageText.classList.remove('hidden');
                 setTimeout(() => messageText.classList.add('hidden'), 2500);
             }
@@ -289,7 +284,7 @@
                     const singleItemHTML = `<div class="content-container w-full h-full flex items-center justify-center text-center"><span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-black opacity-10 text-6xl sm:text-8xl font-black z-0">1</span><span class="relative z-10 font-semibold text-xl sm:text-3xl">${capitalizeFirstLetter(regionName)}</span></div>`;
                     clickableAreas.forEach(area => { area.innerHTML = singleItemHTML; });
                 } else if (isSetSelectionMode) {
-                    messageText.textContent = "Pilih Set Prediksi";
+                    messageText.textContent = "Pilih Grup Prediksi";
                     messageText.classList.remove('hidden');
                     const setsPerPage = 5;
                     const startIndex = setPageIndex * setsPerPage;

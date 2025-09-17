@@ -265,6 +265,7 @@
             let isSingleItemMode = false;
             let isListening = false;
             let recognition;
+            let matchFound = false; // BUG FIX: Flag to prevent race condition
 
             // --- Speech Recognition Setup ---
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -276,6 +277,7 @@
 
                 recognition.onstart = () => {
                     isListening = true;
+                    matchFound = false; // BUG FIX: Reset flag on start
                     micBtn.classList.add('bg-red-500', 'listening-animation');
                     micBtn.classList.remove('bg-gray-200');
                     voiceStatus.textContent = 'Mendengarkan...';
@@ -285,7 +287,10 @@
                     isListening = false;
                     micBtn.classList.remove('bg-red-500', 'listening-animation');
                     micBtn.classList.add('bg-gray-200');
-                    voiceStatus.textContent = 'Tekan untuk berbicara';
+                    // BUG FIX: Only reset the status if no match was found.
+                    if (!matchFound) {
+                        voiceStatus.textContent = 'Tekan untuk berbicara';
+                    }
                     transcriptPreview.textContent = '';
                 };
 
@@ -299,6 +304,7 @@
                 };
 
                 recognition.onresult = (event) => {
+                    if (matchFound) return; // Don't process further if a match is already being handled
                     const transcript = Array.from(event.results).map(result => result[0]).map(result => result.transcript).join('');
                     transcriptPreview.textContent = transcript;
                     const startPhrase = appData.settings.startPhrase.toLowerCase();
@@ -309,7 +315,6 @@
                         const endIndex = transcriptLower.lastIndexOf(endPhrase);
                         if (startIndex < endIndex) {
                             const keyword = transcript.substring(startIndex, endIndex).trim();
-                            recognition.stop();
                             findAndExecute(keyword);
                         }
                     }
@@ -320,6 +325,9 @@
             
             // --- Main Functions ---
             function findAndExecute(keyword) {
+                if (!keyword) return;
+                matchFound = true; // BUG FIX: Set the flag to true
+                recognition.stop();
                 const allRegions = appData.pages.flatMap(p => p.regions);
                 let bestMatch = null;
                 let highestScore = 0;
@@ -334,22 +342,25 @@
                         bestMatch = region;
                     }
                 });
+
                 if (bestMatch) {
                     voiceStatus.textContent = `Membuka: ${capitalizeFirstLetter(bestMatch)}`;
                     setTimeout(() => executeAction(bestMatch), 1500);
                 } else {
                     voiceStatus.textContent = `Tidak ditemukan: "${keyword}"`;
+                     setTimeout(() => {
+                        if (!isListening) voiceStatus.textContent = 'Tekan untuk berbicara';
+                    }, 2000);
                 }
             }
             
-            // CORRECTED: This function now ONLY performs the action.
             function executeAction(regionName) {
                 const { searchEngine, shortcutName } = appData.settings;
                 let url = '';
                 if (searchEngine === 'shortcut') {
                     if (!shortcutName) { 
                         showNotification('Nama Shortcut belum diatur!');
-                        updateMainView(); // Go back to main view if error
+                        updateMainView();
                         return; 
                     }
                     url = `shortcuts://run-shortcut?name=${encodeURIComponent(shortcutName)}&input=${encodeURIComponent(regionName)}`; 
@@ -358,7 +369,7 @@
                     url = (searchEngine === 'maps') ? `https://maps.google.com/?q=${encodeURIComponent(regionName)}` : `https://www.google.com/search?q=${encodeURIComponent(regionName)}`;
                     openInExternalBrowser(url);
                 }
-                 // In case of grid view, show feedback
+                
                 if(appData.settings.inputMethod === 'grid') {
                     messageText.textContent = `Membuka: ${capitalizeFirstLetter(regionName)}`;
                     messageText.classList.remove('hidden');

@@ -157,7 +157,7 @@
         </div>
     </div>
     
-    <!-- REVISED Instructions Modal -->
+    <!-- Instructions Modal -->
     <div id="instructions-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 sm:p-8 modal">
        <div class="bg-white border border-black rounded-lg shadow-xl w-full max-w-md flex flex-col text-black max-h-[90vh]">
             <div class="p-4 border-b border-gray-300 flex justify-between items-center flex-shrink-0">
@@ -264,11 +264,10 @@
             let isSetSelectionMode = true;
             let isSingleItemMode = false;
             let isListening = false;
+            let recognition;
 
             // --- Speech Recognition Setup ---
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            let recognition;
-
             if (SpeechRecognition) {
                 recognition = new SpeechRecognition();
                 recognition.continuous = true;
@@ -343,19 +342,27 @@
                 }
             }
             
+            // CORRECTED: This function now ONLY performs the action.
             function executeAction(regionName) {
-                messageText.textContent = `Membuka: ${capitalizeFirstLetter(regionName)}`;
-                messageText.classList.remove('hidden');
-                setTimeout(() => updateMainView(), 2500);
                 const { searchEngine, shortcutName } = appData.settings;
                 let url = '';
                 if (searchEngine === 'shortcut') {
-                    if (!shortcutName) { messageText.textContent = 'Nama Shortcut belum diatur!'; return; }
+                    if (!shortcutName) { 
+                        showNotification('Nama Shortcut belum diatur!');
+                        updateMainView(); // Go back to main view if error
+                        return; 
+                    }
                     url = `shortcuts://run-shortcut?name=${encodeURIComponent(shortcutName)}&input=${encodeURIComponent(regionName)}`; 
                     window.location.href = url;
                 } else {
                     url = (searchEngine === 'maps') ? `https://maps.google.com/?q=${encodeURIComponent(regionName)}` : `https://www.google.com/search?q=${encodeURIComponent(regionName)}`;
                     openInExternalBrowser(url);
+                }
+                 // In case of grid view, show feedback
+                if(appData.settings.inputMethod === 'grid') {
+                    messageText.textContent = `Membuka: ${capitalizeFirstLetter(regionName)}`;
+                    messageText.classList.remove('hidden');
+                    setTimeout(() => messageText.classList.add('hidden'), 2500);
                 }
             }
             
@@ -463,6 +470,7 @@
             }));
 
             micBtn.addEventListener('click', () => {
+                if (!recognition) return;
                 if (!isListening) {
                     try { recognition.start(); } catch(e) { console.error("Could not start recognition:", e); }
                 } else {

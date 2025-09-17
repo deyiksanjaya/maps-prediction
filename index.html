@@ -94,6 +94,12 @@
             </button>
             <p id="voice-status" class="mt-8 text-lg text-gray-600 font-semibold">Tekan untuk berbicara</p>
             <p id="transcript-preview" class="mt-2 text-sm text-gray-400 h-6 italic"></p>
+            <!-- NEW: Confirmation button area -->
+            <div id="confirmation-area" class="mt-4 hidden">
+                <button id="confirm-action-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-500 transition-colors">
+                    Buka Google Maps
+                </button>
+            </div>
         </div>
 
         <div id="message-area" class="mt-8 h-10 text-center flex flex-col items-center justify-center">
@@ -176,28 +182,28 @@
                     </ol>
                 </div>
                  <div>
+                    <!-- CHANGED: Title updated -->
                     <h3 class="font-semibold text-lg mb-2">Mode Pengenalan Suara</h3>
-                    <p class="text-sm mb-2">Mode pengenalan suara menggunakan struktur kalimat khusus untuk memastikan perintah Anda akurat dan untuk menghindari pemicu yang tidak disengaja dari percakapan sekitar.</p>
                     <ol class="list-decimal list-inside space-y-2 text-sm">
                         <li>
-                           <strong>Frasa Pemicu:</strong> Aplikasi menunggu Anda mengucapkan kalimat lengkap yang terdiri dari <strong>[Kata Pembuka]</strong> + <strong>[ITEM PREDIKSI]</strong> + <strong>[Kata Penutup]</strong>.
+                           <strong>Frasa Pemicu:</strong> Aplikasi menggunakan kalimat lengkap untuk akurasi: <strong>[Kata Pembuka]</strong> + <strong>[ITEM]</strong> + <strong>[Kata Penutup]</strong>.
                         </li>
                         <li>
                            <strong>Cara Menggunakan:</strong>
                            <ul class="list-disc list-inside ml-4 mt-1">
-                               <li>Tekan tombol mikrofon. Aplikasi akan meminta izin akses mikrofon saat pertama kali digunakan.</li>
-                               <li>Ucapkan kalimat perintah Anda secara lengkap. Contoh default: <br><em class="font-semibold">"Yang kamu pilih adalah Monumen Nasional betul?"</em></li>
-                               <li>Aplikasi akan otomatis mendeteksi item ("Monumen Nasional"), berhenti merekam, dan membuka tujuan Anda.</li>
+                               <li>Tekan tombol mikrofon.</li>
+                               <li>Ucapkan perintah Anda, contoh: <em class="font-semibold">"Yang kamu pilih adalah Monumen Nasional betul?"</em></li>
+                               <li>Saat item ditemukan, sebuah tombol konfirmasi akan muncul. Tekan tombol itu untuk membuka tujuan Anda.</li>
                            </ul>
                         </li>
                         <li>
-                           <strong>Kustomisasi:</strong> Anda dapat mengubah "Kata Pembuka" dan "Kata Penutup" sesuai keinginan Anda di menu Pengaturan (⚙️).
+                           <strong>Kustomisasi:</strong> Anda bisa mengubah "Kata Pembuka" dan "Kata Penutup" di menu Pengaturan (⚙️).
                         </li>
                     </ol>
                 </div>
                 <div>
                     <h3 class="font-semibold text-lg mb-2">Pengaturan</h3>
-                     <p class="text-sm">Di Pengaturan (⚙️), Anda bisa memilih antara mode Grid atau Suara, mengubah frasa suara, mengatur tujuan redirect (Maps, Search, Shortcut), dan mengedit daftar prediksi Anda.</p>
+                     <p class="text-sm">Di Pengaturan (⚙️), Anda bisa memilih mode, mengubah frasa suara, mengatur tujuan redirect, dan mengedit daftar prediksi Anda.</p>
                 </div>
             </div>
         </div>
@@ -218,7 +224,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const STORAGE_KEY = 'magicAppDataV6';
+            const STORAGE_KEY = 'magicAppDataV7'; // Version up
 
             const defaultData = {
                 settings: { 
@@ -256,6 +262,10 @@
             const micBtn = document.getElementById('mic-btn');
             const voiceStatus = document.getElementById('voice-status');
             const transcriptPreview = document.getElementById('transcript-preview');
+            // NEW elements for confirmation
+            const confirmationArea = document.getElementById('confirmation-area');
+            const confirmActionBtn = document.getElementById('confirm-action-btn');
+
 
             // --- State Variables ---
             let appData = {};
@@ -265,8 +275,7 @@
             let isSingleItemMode = false;
             let isListening = false;
             let recognition;
-            let matchFound = false;
-
+            
             // --- Speech Recognition Setup ---
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (SpeechRecognition) {
@@ -277,19 +286,16 @@
 
                 recognition.onstart = () => {
                     isListening = true;
-                    matchFound = false;
                     micBtn.classList.add('bg-red-500', 'listening-animation');
                     micBtn.classList.remove('bg-gray-200');
                     voiceStatus.textContent = 'Mendengarkan...';
+                    confirmationArea.classList.add('hidden'); // Hide button on new search
                 };
 
                 recognition.onend = () => {
                     isListening = false;
                     micBtn.classList.remove('bg-red-500', 'listening-animation');
                     micBtn.classList.add('bg-gray-200');
-                    if (!matchFound) {
-                        voiceStatus.textContent = 'Tekan untuk berbicara';
-                    }
                     transcriptPreview.textContent = '';
                 };
 
@@ -303,7 +309,6 @@
                 };
 
                 recognition.onresult = (event) => {
-                    if (matchFound) return;
                     const transcript = Array.from(event.results).map(result => result[0]).map(result => result.transcript).join('');
                     transcriptPreview.textContent = transcript;
                     const startPhrase = appData.settings.startPhrase.toLowerCase();
@@ -314,7 +319,8 @@
                         const endIndex = transcriptLower.lastIndexOf(endPhrase);
                         if (startIndex < endIndex) {
                             const keyword = transcript.substring(startIndex, endIndex).trim();
-                            findAndExecute(keyword);
+                            recognition.stop();
+                            findAndConfirm(keyword);
                         }
                     }
                 };
@@ -323,10 +329,8 @@
             }
             
             // --- Main Functions ---
-            function findAndExecute(keyword) {
+            function findAndConfirm(keyword) {
                 if (!keyword) return;
-                matchFound = true;
-                recognition.stop();
                 const allRegions = appData.pages.flatMap(p => p.regions);
                 let bestMatch = null;
                 let highestScore = 0;
@@ -343,17 +347,28 @@
                 });
 
                 if (bestMatch) {
-                    voiceStatus.textContent = `Membuka: ${capitalizeFirstLetter(bestMatch)}`;
-                    // BUG FIX: Execute action immediately, THEN set a timer to reset the UI.
-                    executeAction(bestMatch);
-                    setTimeout(() => {
-                        if (!isListening) voiceStatus.textContent = 'Tekan untuk berbicara';
-                    }, 2500); 
+                    voiceStatus.innerHTML = `Ditemukan: <strong class="text-black">${capitalizeFirstLetter(bestMatch)}</strong>`;
+                    
+                    // Set button text dynamically
+                    const engine = appData.settings.searchEngine;
+                    let btnText = "Buka Google Maps";
+                    if(engine === 'google') btnText = "Buka Google Search";
+                    if(engine === 'shortcut') btnText = "Jalankan Shortcut";
+                    confirmActionBtn.textContent = btnText;
+                    
+                    // Show confirmation button and add one-time click listener
+                    confirmationArea.classList.remove('hidden');
+                    confirmActionBtn.onclick = () => {
+                        executeAction(bestMatch);
+                        confirmationArea.classList.add('hidden');
+                        voiceStatus.textContent = 'Tekan untuk berbicara';
+                    };
+
                 } else {
                     voiceStatus.textContent = `Tidak ditemukan: "${keyword}"`;
                      setTimeout(() => {
                         if (!isListening) voiceStatus.textContent = 'Tekan untuk berbicara';
-                    }, 2000);
+                    }, 2500);
                 }
             }
             
@@ -363,7 +378,6 @@
                 if (searchEngine === 'shortcut') {
                     if (!shortcutName) { 
                         showNotification('Nama Shortcut belum diatur!');
-                        updateMainView();
                         return; 
                     }
                     url = `shortcuts://run-shortcut?name=${encodeURIComponent(shortcutName)}&input=${encodeURIComponent(regionName)}`; 

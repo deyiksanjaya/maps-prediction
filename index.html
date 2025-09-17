@@ -176,8 +176,8 @@
                     </ol>
                 </div>
                  <div>
-                    <h3 class="font-semibold text-lg mb-2">Penjelasan Detail Mode Suara</h3>
-                    <p class="text-sm mb-2">Mode Suara menggunakan struktur kalimat khusus untuk memastikan perintah Anda akurat dan untuk menghindari pemicu yang tidak disengaja dari percakapan sekitar.</p>
+                    <h3 class="font-semibold text-lg mb-2">Mode Pengenalan Suara</h3>
+                    <p class="text-sm mb-2">Mode pengenalan suara menggunakan struktur kalimat khusus untuk memastikan perintah Anda akurat dan untuk menghindari pemicu yang tidak disengaja dari percakapan sekitar.</p>
                     <ol class="list-decimal list-inside space-y-2 text-sm">
                         <li>
                            <strong>Frasa Pemicu:</strong> Aplikasi menunggu Anda mengucapkan kalimat lengkap yang terdiri dari <strong>[Kata Pembuka]</strong> + <strong>[ITEM PREDIKSI]</strong> + <strong>[Kata Penutup]</strong>.
@@ -344,7 +344,11 @@
 
                 if (bestMatch) {
                     voiceStatus.textContent = `Membuka: ${capitalizeFirstLetter(bestMatch)}`;
-                    setTimeout(() => executeAction(bestMatch), 1500);
+                    // BUG FIX: Execute action immediately, THEN set a timer to reset the UI.
+                    executeAction(bestMatch);
+                    setTimeout(() => {
+                        if (!isListening) voiceStatus.textContent = 'Tekan untuk berbicara';
+                    }, 2500); 
                 } else {
                     voiceStatus.textContent = `Tidak ditemukan: "${keyword}"`;
                      setTimeout(() => {
@@ -367,7 +371,6 @@
                     url = (searchEngine === 'maps') ? `https://maps.google.com/?q=${encodeURIComponent(regionName)}` : `https://www.google.com/search?q=${encodeURIComponent(regionName)}`;
                 }
                 
-                // BUG FIX: ALWAYS use the external browser function for ALL cases.
                 openInExternalBrowser(url);
 
                 if(appData.settings.inputMethod === 'grid') {

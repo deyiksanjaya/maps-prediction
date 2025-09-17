@@ -48,14 +48,6 @@
         .modal-content-area::-webkit-scrollbar { width: 8px; }
         .modal-content-area::-webkit-scrollbar-track { background: #f1f1f1; }
         .modal-content-area::-webkit-scrollbar-thumb { background: #a8a8a8; border-radius: 4px; }
-        
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            50% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
-        }
-        .listening-animation {
-            animation: pulse 1.5s infinite;
-        }
     </style>
 </head>
 <body class="bg-white text-black">
@@ -87,20 +79,6 @@
             <div data-index="4" class="clickable-area absolute top-1/2 left-1/2 w-[34%] h-[34%] border-2 border-black cursor-pointer transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center p-2 text-center"></div>
         </div>
         
-        <!-- Voice View -->
-        <div id="voice-view-container" class="hidden w-full h-full flex flex-col items-center justify-center text-center p-8">
-            <button id="mic-btn" class="w-24 h-24 sm:w-32 sm:h-32 bg-gray-200 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg hover:bg-gray-300 focus:outline-none">
-                 <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
-            </button>
-            <p id="voice-status" class="mt-8 text-lg text-gray-600 font-semibold">Tekan untuk berbicara</p>
-            <p id="transcript-preview" class="mt-2 text-sm text-gray-400 h-6 italic"></p>
-            <div id="confirmation-area" class="mt-4 hidden">
-                <button id="confirm-action-btn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-500 transition-colors">
-                    Buka Google Maps
-                </button>
-            </div>
-        </div>
-
         <div id="message-area" class="mt-8 h-10 text-center flex flex-col items-center justify-center">
             <p id="message-text" class="text-lg text-gray-500">Memuat...</p>
         </div>
@@ -117,30 +95,6 @@
             </div>
             
             <div class="overflow-y-auto modal-content-area">
-                <div class="p-4 border-b border-gray-300">
-                    <h3 class="font-semibold mb-2">Metode Input Utama</h3>
-                    <div class="flex flex-col space-y-2">
-                        <label class="flex items-center"><input type="radio" name="inputMethod" value="grid" class="mr-2"> Tampilan Grid</label>
-                        <label class="flex items-center"><input type="radio" name="inputMethod" value="voice" class="mr-2"> Pengenalan Suara</label>
-                    </div>
-                    <div id="voice-settings-container" class="hidden mt-4 pt-4 border-t border-gray-200 space-y-3">
-                        <div>
-                            <label for="start-phrase-input" class="block font-medium text-sm mb-1">Kata Pembuka</label>
-                            <input type="text" id="start-phrase-input" class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2">
-                        </div>
-                        <div>
-                            <label for="end-phrase-input" class="block font-medium text-sm mb-1">Kata Penutup</label>
-                            <input type="text" id="end-phrase-input" class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2">
-                        </div>
-                        <div class="flex items-center pt-2">
-                            <input type="checkbox" id="fallback-search-checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                            <label for="fallback-search-checkbox" class="ml-2 block text-sm text-gray-800">
-                                Jika tidak ada di daftar, cari langsung
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="p-4 border-b border-gray-300">
                     <h3 class="font-semibold mb-2">Prediksikan ke:</h3>
                     <div class="flex flex-col space-y-2">
@@ -177,23 +131,52 @@
                     <img src="https://img.icons8.com/ios-filled/24/000000/delete-sign.png" alt="Tutup" class="w-5 h-5"/>
                 </button>
             </div>
-             <div class="p-6 space-y-6 overflow-y-auto modal-content-area">
+             <div class="p-6 space-y-4 overflow-y-auto modal-content-area">
                 <div>
-                    <h3 class="font-semibold text-lg mb-2">Mode Grid</h3>
-                    <ol class="list-decimal list-inside space-y-2 text-sm">
-                        <li>Layar utama menampilkan halaman set (misal: "1-5"). Geser ke kiri/kanan untuk berpindah halaman set.</li>
-                        <li>Tekan sebuah set untuk melihat isinya.</li>
-                        <li>Saat melihat item, geser ke kiri untuk ke set berikutnya, atau geser ke kanan untuk kembali (Undo).</li>
+                    <h3 class="font-semibold text-lg mb-2">Selamat Datang!</h3>
+                    <p class="text-sm">Aplikasi ini dirancang untuk akses cepat ke lokasi favorit Anda. Berikut cara kerjanya:</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-md mt-4 mb-2">1. Konsep Utama: Set & Item</h4>
+                    <ul class="list-disc list-inside space-y-2 text-sm">
+                        <li><strong>Item:</strong> Adalah satu lokasi tujuan Anda (misal: "Pantai Kuta").</li>
+                        <li><strong>Set:</strong> Adalah kumpulan dari 5 Item. Jika Anda punya 15 item, maka akan ada 3 Set (Set 1-5, Set 6-10, Set 11-15). Konsep ini membantu navigasi agar tidak terlalu ramai.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold text-md mt-4 mb-2">2. Alur Penggunaan</h4>
+                    <ol class="list-decimal list-inside space-y-3 text-sm">
+                        <li>
+                            <strong>Pilih Set:</strong> Layar awal akan menampilkan pilihan Set ("1-5", "6-10", dst.).
+                            <br>
+                            <em class="text-gray-600">Geser (swipe) ke kiri atau kanan untuk melihat halaman Set lainnya jika tersedia.</em>
+                        </li>
+                        <li>
+                            <strong>Pilih Item:</strong> Ketuk salah satu kotak Set untuk melihat 5 item di dalamnya.
+                        </li>
+                        <li>
+                            <strong>Buka Lokasi:</strong> Setelah melihat item, ketuk item yang Anda inginkan untuk membukanya di aplikasi pilihan Anda (Google Maps, dll).
+                        </li>
+                        <li>
+                            <strong>Navigasi Cepat (Saat Melihat Item):</strong>
+                             <ul class="list-disc list-inside ml-4 mt-2 text-gray-600 space-y-1">
+                                <li><strong>Geser ke Kiri:</strong> Langsung lanjut ke Set berikutnya tanpa harus kembali.</li>
+                                <li><strong>Geser ke Kanan:</strong> Kembali ke tampilan pilihan Set (Undo).</li>
+                            </ul>
+                        </li>
                     </ol>
                 </div>
-                 <div>
-                    <h3 class="font-semibold text-lg mb-2">Mode Pengenalan Suara</h3>
-                    <ol class="list-decimal list-inside space-y-2 text-sm">
-                        <li><strong>Cara Menggunakan:</strong> Tekan tombol mikrofon, lalu ucapkan perintah Anda dengan format: <br><strong class="italic">[Kata Pembuka] + [ITEM] + [Kata Penutup]</strong>.</li>
-                        <li><strong>Konfirmasi:</strong> Sebuah tombol akan muncul setelah item terdeteksi. Tekan tombol itu untuk membuka tujuan Anda.</li>
-                        <li><strong>Pencarian Langsung (Opsional):</strong> Aktifkan di Pengaturan agar aplikasi dapat mencari item di luar daftar Anda.</li>
-                        <li><strong class="text-red-600">Jaring Pengaman:</strong> Jika perintah suara Anda gagal atau tidak dikenali, aplikasi akan otomatis beralih kembali ke Mode Grid agar Anda tetap bisa melanjutkan.</li>
-                    </ol>
+
+                <div>
+                    <h4 class="font-semibold text-md mt-4 mb-2">3. Pengaturan</h4>
+                     <p class="text-sm">Tekan ikon gerigi <img src="https://img.icons8.com/ios-glyphs/16/000000/settings.png" alt="settings icon" class="inline h-4 w-4 mx-1"> di pojok kiri atas untuk:
+                        <ul class="list-disc list-inside space-y-1 text-sm mt-2">
+                            <li>Mengubah atau menambah daftar lokasi favorit Anda.</li>
+                            <li>Memilih aplikasi tujuan (Google Maps, Google Search, atau Shortcut iOS).</li>
+                        </ul>
+                    </p>
                 </div>
             </div>
         </div>
@@ -214,18 +197,19 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const STORAGE_KEY = 'magicAppDataV8';
+            const STORAGE_KEY = 'magicAppDataV8_GridOnly_Bali'; // Changed key to serve new default data
 
+            // --- NEW: Default placeholder data with Bali locations ---
             const defaultData = {
                 settings: { 
                     searchEngine: 'maps', 
                     shortcutName: '',
-                    inputMethod: 'grid',
-                    startPhrase: 'yang kamu pilih adalah',
-                    endPhrase: 'betul',
-                    voiceFallbackSearch: false
                 },
-                pages: [ { startNumber: 1, regions: ['Monumen Nasional'] } ]
+                pages: [ 
+                    { startNumber: 1, regions: ['Pantai Kuta', 'Seminyak', 'Canggu', 'Garuda Wisnu Kencana', 'Pura Uluwatu'] },
+                    { startNumber: 6, regions: ['Ubud', 'Sawah Terasering Tegalalang', 'Danau Beratan Bedugul', 'Tanah Lot', 'Pantai Lovina'] },
+                    { startNumber: 11, regions: ['Nusa Dua', 'Sanur', 'Jimbaran', 'Gunung Batur', 'Tirta Empul'] }
+                ]
             };
             
             // --- Elements ---
@@ -244,18 +228,7 @@
             const bulkAddInput = document.getElementById('bulk-add-input');
             const notificationModal = document.getElementById('notification-modal');
             const notificationText = document.getElementById('notification-text');
-            const inputMethodRadios = document.querySelectorAll('input[name="inputMethod"]');
-            const voiceSettingsContainer = document.getElementById('voice-settings-container');
-            const startPhraseInput = document.getElementById('start-phrase-input');
-            const endPhraseInput = document.getElementById('end-phrase-input');
-            const fallbackSearchCheckbox = document.getElementById('fallback-search-checkbox');
             const gridViewContainer = document.getElementById('grid-view-container');
-            const voiceViewContainer = document.getElementById('voice-view-container');
-            const micBtn = document.getElementById('mic-btn');
-            const voiceStatus = document.getElementById('voice-status');
-            const transcriptPreview = document.getElementById('transcript-preview');
-            const confirmationArea = document.getElementById('confirmation-area');
-            const confirmActionBtn = document.getElementById('confirm-action-btn');
 
             // --- State Variables ---
             let appData = {};
@@ -263,131 +236,8 @@
             let setPageIndex = 0;
             let isSetSelectionMode = true;
             let isSingleItemMode = false;
-            let isListening = false;
-            let recognition;
-            let matchFound = false;
 
-            // --- Speech Recognition Setup ---
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                recognition = new SpeechRecognition();
-                recognition.continuous = true;
-                recognition.lang = 'id-ID';
-                recognition.interimResults = true;
-
-                recognition.onstart = () => {
-                    isListening = true;
-                    matchFound = false;
-                    micBtn.classList.add('bg-red-500', 'listening-animation');
-                    micBtn.classList.remove('bg-gray-200');
-                    voiceStatus.textContent = 'Mendengarkan...';
-                    confirmationArea.classList.add('hidden');
-                };
-
-                recognition.onend = () => {
-                    isListening = false;
-                    micBtn.classList.remove('bg-red-500', 'listening-animation');
-                    micBtn.classList.add('bg-gray-200');
-                    transcriptPreview.textContent = '';
-                    // FALLBACK LOGIC: If recognition ends and no match was ever found
-                    if (!matchFound) {
-                        voiceStatus.textContent = 'Tekan untuk berbicara';
-                        // Switch to grid mode if the setting is not to fallback search
-                        if (!appData.settings.voiceFallbackSearch) {
-                            showNotification("Perintah tidak dikenali. Beralih ke Mode Grid.");
-                            appData.settings.inputMethod = 'grid'; // Change in state
-                            updateMainView(); // Visually switch UI
-                        }
-                    }
-                };
-
-                recognition.onerror = (event) => {
-                    console.error('Speech recognition error:', event.error);
-                    if (event.error === 'not-allowed') {
-                        voiceStatus.textContent = 'Izin mikrofon ditolak.';
-                    } else {
-                        voiceStatus.textContent = 'Error: ' + event.error;
-                    }
-                };
-
-                recognition.onresult = (event) => {
-                    if (matchFound) return;
-                    const transcript = Array.from(event.results).map(result => result[0]).map(result => result.transcript).join('');
-                    transcriptPreview.textContent = transcript;
-                    const startPhrase = appData.settings.startPhrase.toLowerCase();
-                    const endPhrase = appData.settings.endPhrase.toLowerCase();
-                    const transcriptLower = transcript.toLowerCase();
-                    if (transcriptLower.includes(startPhrase) && transcriptLower.includes(endPhrase)) {
-                        const startIndex = transcriptLower.indexOf(startPhrase) + startPhrase.length;
-                        const endIndex = transcriptLower.lastIndexOf(endPhrase);
-                        if (startIndex < endIndex) {
-                            const keyword = transcript.substring(startIndex, endIndex).trim();
-                            recognition.stop();
-                            findAndConfirm(keyword);
-                        }
-                    }
-                };
-            } else {
-                document.querySelector('input[name="inputMethod"][value="voice"]').parentElement.style.display = 'none';
-            }
-            
             // --- Main Functions ---
-            function findAndConfirm(keyword) {
-                if (!keyword) return;
-                const allRegions = appData.pages.flatMap(p => p.regions);
-                let bestMatch = null;
-                let highestScore = 0;
-                const lowerKeyword = keyword.toLowerCase();
-                allRegions.forEach(region => {
-                    const lowerRegion = region.toLowerCase();
-                    let score = 0;
-                    if (lowerRegion === lowerKeyword) score = 100;
-                    else if (lowerRegion.includes(lowerKeyword) || lowerKeyword.includes(lowerRegion)) score = (lowerKeyword.length / lowerRegion.length) * 80;
-                    if (score > highestScore) {
-                        highestScore = score;
-                        bestMatch = region;
-                    }
-                });
-                
-                if (bestMatch) {
-                    matchFound = true; // Success!
-                    voiceStatus.innerHTML = `Ditemukan: <strong class="text-black">${capitalizeFirstLetter(bestMatch)}</strong>`;
-                    const engine = appData.settings.searchEngine;
-                    let btnText = "Buka Google Maps";
-                    if(engine === 'google') btnText = "Buka Google Search";
-                    if(engine === 'shortcut') btnText = "Jalankan Shortcut";
-                    confirmActionBtn.textContent = btnText;
-                    
-                    confirmationArea.classList.remove('hidden');
-                    confirmActionBtn.onclick = () => {
-                        executeAction(bestMatch);
-                        confirmationArea.classList.add('hidden');
-                        voiceStatus.textContent = 'Tekan untuk berbicara';
-                    };
-                } else if (appData.settings.voiceFallbackSearch) {
-                    matchFound = true; // Success, via fallback!
-                    voiceStatus.innerHTML = `Tidak ada di daftar. Cari langsung untuk <strong class="text-black">"${capitalizeFirstLetter(keyword)}"</strong>?`;
-                    let btnText = `Cari di Google Maps`;
-                    const engine = appData.settings.searchEngine;
-                     if(engine === 'google') btnText = `Cari di Google Search`;
-                     if(engine === 'shortcut') {
-                         voiceStatus.textContent = `Tidak ditemukan: "${keyword}"`;
-                         matchFound = false; // It's a failure if shortcut can't fallback
-                         return;
-                     }
-                    confirmActionBtn.textContent = btnText;
-                    confirmationArea.classList.remove('hidden');
-                    confirmActionBtn.onclick = () => {
-                        executeAction(keyword);
-                        confirmationArea.classList.add('hidden');
-                        voiceStatus.textContent = 'Tekan untuk berbicara';
-                    };
-                } else {
-                    voiceStatus.textContent = `Tidak ditemukan: "${keyword}"`;
-                    // No match found, let onend handle the fallback to grid
-                }
-            }
-            
             function executeAction(regionName) {
                 const { searchEngine, shortcutName } = appData.settings;
                 let url = '';
@@ -401,11 +251,9 @@
                     url = (searchEngine === 'maps') ? `https://maps.google.com/?q=${encodeURIComponent(regionName)}` : `https://www.google.com/search?q=${encodeURIComponent(regionName)}`;
                 }
                 openInExternalBrowser(url);
-                if(appData.settings.inputMethod === 'grid') {
-                    messageText.textContent = `Membuka: ${capitalizeFirstLetter(regionName)}`;
-                    messageText.classList.remove('hidden');
-                    setTimeout(() => messageText.classList.add('hidden'), 2500);
-                }
+                messageText.textContent = `Membuka: ${capitalizeFirstLetter(regionName)}`;
+                messageText.classList.remove('hidden');
+                setTimeout(() => messageText.classList.add('hidden'), 2500);
             }
             
             // --- Helper Functions ---
@@ -423,7 +271,7 @@
                 const storedData = localStorage.getItem(STORAGE_KEY);
                 try {
                     const parsedData = JSON.parse(storedData);
-                    if (parsedData && parsedData.settings && parsedData.pages) {
+                    if (parsedData && parsedData.settings && parsedData.pages && parsedData.pages.length > 0) {
                         return { ...defaultData, ...parsedData, settings: { ...defaultData.settings, ...parsedData.settings } };
                     }
                     return defaultData;
@@ -432,18 +280,6 @@
 
             function saveDataToStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); }
             
-            function updateMainView() {
-                if (appData.settings.inputMethod === 'voice') {
-                    voiceViewContainer.classList.remove('hidden');
-                    gridViewContainer.classList.add('hidden');
-                    messageText.classList.add('hidden');
-                } else {
-                    voiceViewContainer.classList.add('hidden');
-                    gridViewContainer.classList.remove('hidden');
-                    updateGridView();
-                }
-            }
-
             function updateGridView() {
                 if (!appData.pages || appData.pages.length === 0) return;
                 isSingleItemMode = appData.pages.length === 1 && appData.pages[0].regions.length === 1;
@@ -486,13 +322,8 @@
             }
 
             function populateSettingsModal() {
-                document.querySelector(`input[name="inputMethod"][value="${appData.settings.inputMethod}"]`).checked = true;
                 document.querySelector(`input[name="searchEngine"][value="${appData.settings.searchEngine}"]`).checked = true;
-                fallbackSearchCheckbox.checked = appData.settings.voiceFallbackSearch;
                 shortcutNameInput.value = appData.settings.shortcutName || '';
-                startPhraseInput.value = appData.settings.startPhrase;
-                endPhraseInput.value = appData.settings.endPhrase;
-                voiceSettingsContainer.classList.toggle('hidden', appData.settings.inputMethod !== 'voice');
                 shortcutNameContainer.classList.toggle('hidden', appData.settings.searchEngine !== 'shortcut');
                 const allRegions = appData.pages.flatMap(page => page.regions);
                 bulkAddInput.value = allRegions.join(', ');
@@ -504,41 +335,33 @@
             openInstructionsBtn.addEventListener('click', () => instructionsModal.classList.remove('hidden'));
             closeInstructionsModalBtn.addEventListener('click', () => instructionsModal.classList.add('hidden'));
             
-            inputMethodRadios.forEach(radio => radio.addEventListener('change', (e) => {
-                voiceSettingsContainer.classList.toggle('hidden', e.target.value !== 'voice');
-            }));
-            
             searchEngineRadios.forEach(radio => radio.addEventListener('change', (e) => {
                 shortcutNameContainer.classList.toggle('hidden', e.target.value !== 'shortcut');
             }));
 
-            micBtn.addEventListener('click', () => {
-                if (!recognition) return;
-                if (!isListening) {
-                    try { recognition.start(); } catch(e) { console.error("Could not start recognition:", e); }
-                } else {
-                    recognition.stop();
-                }
-            });
-
             saveBtn.addEventListener('click', () => {
-                appData.settings.inputMethod = document.querySelector('input[name="inputMethod"]:checked').value;
                 appData.settings.searchEngine = document.querySelector('input[name="searchEngine"]:checked').value;
                 appData.settings.shortcutName = shortcutNameInput.value.trim();
-                appData.settings.startPhrase = startPhraseInput.value.trim();
-                appData.settings.endPhrase = endPhraseInput.value.trim();
-                appData.settings.voiceFallbackSearch = fallbackSearchCheckbox.checked;
                 
                 const allRegions = bulkAddInput.value.split(',').map(item => item.trim()).filter(Boolean);
                 const newPages = [];
+                let currentStartNumber = 1;
                 for (let i = 0; i < allRegions.length; i += 5) {
-                    newPages.push({ startNumber: i + 1, regions: allRegions.slice(i, i + 5) });
+                    const pageRegions = allRegions.slice(i, i + 5)
+                    newPages.push({ startNumber: currentStartNumber, regions: pageRegions });
+                    currentStartNumber += pageRegions.length;
                 }
-                appData.pages = newPages.length > 0 ? newPages : [defaultData.pages[0]];
+                
+                if (newPages.length === 0) {
+                     appData.pages = [ { startNumber: 1, regions: ['Item Contoh'] } ];
+                } else {
+                    appData.pages = newPages;
+                }
+
                 saveDataToStorage();
                 isSetSelectionMode = true; 
                 setPageIndex = 0;
-                updateMainView();
+                updateGridView();
                 settingsModal.classList.add('hidden');
                 showNotification("Perubahan disimpan!");
             });
@@ -587,7 +410,7 @@
 
             // --- Initial Load ---
             appData = loadDataFromStorage();
-            updateMainView();
+            updateGridView();
         });
     </script>
 </body>

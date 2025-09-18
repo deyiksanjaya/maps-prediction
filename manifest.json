@@ -1,6 +1,6 @@
 {
   "name": "Maps Prediction",
-  "short_name": "Maps Prediction",
+  "short_name": "Calendar",
   "description": "Aplikasi prediksi free choice di google map / google search",
   "start_url": ".",
   "display": "standalone",

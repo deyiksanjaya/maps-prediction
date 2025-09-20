@@ -604,72 +604,59 @@
             }
 
             function triggerGalleryExport(text) {
-                const mainCanvas = document.createElement('canvas');
-                const mainCtx = mainCanvas.getContext('2d');
-                const img = new Image();
-                img.crossOrigin = "Anonymous"; // Handle CORS for external images
+    const mainCanvas = document.createElement('canvas');
+    const mainCtx = mainCanvas.getContext('2d');
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
 
-                img.onload = () => {
-                    // Set canvas size to the original image dimensions
-                    mainCanvas.width = img.naturalWidth;
-                    mainCanvas.height = img.naturalHeight;
+    img.onload = () => {
+        // Set canvas size to the original image dimensions
+        mainCanvas.width = img.naturalWidth;
+        mainCanvas.height = img.naturalHeight;
 
-                    // 1. Create a temporary offscreen canvas for the text AND effects
-                    const textCanvas = document.createElement('canvas');
-                    textCanvas.width = mainCanvas.width;
-                    textCanvas.height = mainCanvas.height;
-                    const textCtx = textCanvas.getContext('2d');
-
-                    // --- Calculate scaling and position ---
-                    const settings = appData.overlaySettings;
-                    const renderedRect = overlayBaseImage.getBoundingClientRect();
-                    const scaleY = img.naturalHeight / renderedRect.height;
-                    const scaledFontSize = parseFloat(settings.fontSize) * scaleY;
-                    
-                    const canvasCenterX = mainCanvas.width / 2;
-                    const canvasCenterY = mainCanvas.height / 2;
-                    const scaleX = img.naturalWidth / renderedRect.width;
-                    const scaledX = settings.x * scaleX;
-                    const scaledY = settings.y * scaleY;
-                    const textX = canvasCenterX + scaledX;
-                    const textY = canvasCenterY + scaledY;
-
-                    // --- Apply ALL styles and effects directly to the text canvas context ---
-                    textCtx.globalAlpha = parseFloat(settings.opacity);
-                    textCtx.filter = `brightness(${settings.brightness}%) contrast(${settings.contrast}%)`;
-                    textCtx.font = `bold ${scaledFontSize}px sans-serif`;
-                    textCtx.fillStyle = settings.color;
-                    textCtx.textAlign = 'center';
-                    textCtx.textBaseline = 'middle';
-
-                    // Draw the transformed text onto the text canvas
-                    textCtx.save();
-                    textCtx.translate(textX, textY);
-                    textCtx.rotate(parseFloat(settings.rotation) * Math.PI / 180);
-                    textCtx.fillText(text, 0, 0);
-                    textCtx.restore();
-                    
-                    // 2. Draw the base image onto the main canvas
-                    mainCtx.drawImage(img, 0, 0, mainCanvas.width, mainCanvas.height);
-                    
-                    // 3. Draw the fully rendered text canvas (with effects) on top of the main canvas
-                    mainCtx.drawImage(textCanvas, 0, 0);
-
-                    // 4. Export the final composed image from the main canvas
-                    const link = document.createElement('a');
-                    link.download = `prediksi-${text.replace(/\s+/g, '-').toLowerCase()}.png`;
-                    link.href = mainCanvas.toDataURL('image/png');
-                    link.click();
-                    showNotification(`"${capitalizeFirstLetter(text)}" diekspor!`);
-                };
-                
-                img.onerror = () => {
-                    showNotification("Gagal memuat gambar untuk ekspor.");
-                };
-                
-                // Start loading the image
-                img.src = overlayBaseImage.src;
-            }
+        // Draw the base image first
+        mainCtx.drawImage(img, 0, 0, mainCanvas.width, mainCanvas.height);
+        
+        // Apply text styling
+        const settings = appData.overlaySettings;
+        const fontSize = parseFloat(settings.fontSize) * (mainCanvas.width / 600); // Scale based on canvas width
+        
+        // Set text properties
+        mainCtx.font = `bold ${fontSize}px sans-serif`;
+        mainCtx.fillStyle = settings.color;
+        mainCtx.textAlign = 'center';
+        mainCtx.textBaseline = 'middle';
+        mainCtx.globalAlpha = parseFloat(settings.opacity);
+        
+        // Apply filters
+        mainCtx.filter = `brightness(${settings.brightness}%) contrast(${settings.contrast}%)`;
+        
+        // Calculate position (center of image plus offsets)
+        const centerX = mainCanvas.width / 2;
+        const centerY = mainCanvas.height / 2;
+        
+        // Apply rotation and draw text
+        mainCtx.save();
+        mainCtx.translate(centerX + (settings.x || 0), centerY + (settings.y || 0));
+        mainCtx.rotate(parseFloat(settings.rotation) * Math.PI / 180);
+        mainCtx.fillText(text, 0, 0);
+        mainCtx.restore();
+        
+        // Export the image
+        const link = document.createElement('a');
+        link.download = `prediksi-${text.replace(/\s+/g, '-').toLowerCase()}.png`;
+        link.href = mainCanvas.toDataURL('image/png');
+        link.click();
+        showNotification(`"${capitalizeFirstLetter(text)}" diekspor!`);
+    };
+    
+    img.onerror = () => {
+        showNotification("Gagal memuat gambar untuk ekspor.");
+    };
+    
+    // Start loading the image
+    img.src = overlayBaseImage.src;
+}
 
             function initializeOverlayEditor() {
                 ['input', 'change'].forEach(evt => {

@@ -614,10 +614,7 @@
                     mainCanvas.width = img.naturalWidth;
                     mainCanvas.height = img.naturalHeight;
 
-                    // 1. Draw the base image onto the main canvas
-                    mainCtx.drawImage(img, 0, 0, mainCanvas.width, mainCanvas.height);
-
-                    // 2. Create a temporary offscreen canvas for the text
+                    // 1. Create a temporary offscreen canvas for the text AND effects
                     const textCanvas = document.createElement('canvas');
                     textCanvas.width = mainCanvas.width;
                     textCanvas.height = mainCanvas.height;
@@ -637,26 +634,28 @@
                     const textX = canvasCenterX + scaledX;
                     const textY = canvasCenterY + scaledY;
 
-                    // --- Apply styles and draw text on the temporary canvas ---
+                    // --- Apply ALL styles and effects directly to the text canvas context ---
+                    textCtx.globalAlpha = parseFloat(settings.opacity);
+                    textCtx.filter = `brightness(${settings.brightness}%) contrast(${settings.contrast}%)`;
                     textCtx.font = `bold ${scaledFontSize}px sans-serif`;
                     textCtx.fillStyle = settings.color;
                     textCtx.textAlign = 'center';
                     textCtx.textBaseline = 'middle';
 
+                    // Draw the transformed text onto the text canvas
                     textCtx.save();
                     textCtx.translate(textX, textY);
                     textCtx.rotate(parseFloat(settings.rotation) * Math.PI / 180);
                     textCtx.fillText(text, 0, 0);
                     textCtx.restore();
-
-                    // 3. Apply global effects (filters, opacity) to the main context
-                    mainCtx.globalAlpha = parseFloat(settings.opacity);
-                    mainCtx.filter = `brightness(${settings.brightness}%) contrast(${settings.contrast}%)`;
                     
-                    // 4. Draw the text canvas (with the rendered text) on top of the main canvas
+                    // 2. Draw the base image onto the main canvas
+                    mainCtx.drawImage(img, 0, 0, mainCanvas.width, mainCanvas.height);
+                    
+                    // 3. Draw the fully rendered text canvas (with effects) on top of the main canvas
                     mainCtx.drawImage(textCanvas, 0, 0);
 
-                    // 5. Export the final composed image from the main canvas
+                    // 4. Export the final composed image from the main canvas
                     const link = document.createElement('a');
                     link.download = `prediksi-${text.replace(/\s+/g, '-').toLowerCase()}.png`;
                     link.href = mainCanvas.toDataURL('image/png');

@@ -48,6 +48,16 @@
         .modal-content-area::-webkit-scrollbar { width: 8px; }
         .modal-content-area::-webkit-scrollbar-track { background: #f1f1f1; }
         .modal-content-area::-webkit-scrollbar-thumb { background: #a8a8a8; border-radius: 4px; }
+
+        /* Added CSS for Overlay Editor */
+        #overlay-editor-container {
+          max-height: 250px;
+          touch-action: none; /* Prevent scrolling on mobile while dragging */
+        }
+        #overlay-text {
+          user-select: none;
+          white-space: nowrap;
+        }
     </style>
 </head>
 <body class="bg-white text-black">
@@ -101,6 +111,7 @@
                         <label class="flex items-center"><input type="radio" name="searchEngine" value="maps" class="mr-2"> Google Maps</label>
                         <label class="flex items-center"><input type="radio" name="searchEngine" value="google" class="mr-2"> Google Search</label>
                         <label class="flex items-center"><input type="radio" name="searchEngine" value="shortcut" class="mr-2"> Shortcut iOS</label>
+                        <label class="flex items-center"><input type="radio" name="searchEngine" value="gallery" class="mr-2"> Galeri (Export Otomatis)</label>
                     </div>
                     <div id="shortcut-name-container" class="hidden mt-3">
                         <label for="shortcut-name-input" class="block font-medium text-sm mb-1">Nama Shortcut</label>
@@ -112,6 +123,60 @@
                     <label for="bulk-add-input" class="block font-medium text-sm mb-1">Daftar Item Prediksi (pisahkan dengan koma)</label>
                     <textarea id="bulk-add-input" rows="8" placeholder="Jakarta, Bandung, Surabaya, ..." class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2"></textarea>
                 </div>
+                
+                <!-- NEW: Overlay Editor Section -->
+                <div class="p-4 border-t border-gray-300 space-y-3">
+                  <h3 class="font-semibold mb-2">Overlay Prediksi</h3>
+                  
+                  <div id="overlay-editor-container" class="relative w-full border border-gray-300 rounded bg-gray-200 overflow-hidden flex items-center justify-center">
+                    <img id="overlay-base-image" src="https://placehold.co/600x400/e2e8f0/64748b?text=Pilih+Gambar" alt="Preview" class="max-w-full max-h-full block object-contain">
+                    <div id="overlay-text" class="absolute font-bold text-black cursor-move" style="font-size: 24px;">
+                      Contoh Teks
+                    </div>
+                  </div>
+                  
+                  <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                    <div class="col-span-2">
+                        <label for="overlay-image-upload" class="block w-full text-center bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-500 transition-colors cursor-pointer">
+                            Pilih Gambar Latar
+                        </label>
+                        <input type="file" id="overlay-image-upload" accept="image/*" class="hidden">
+                    </div>
+
+                    <div class="col-span-2">
+                      <label for="overlay-input" class="block font-medium">Teks Overlay (Default)</label>
+                      <input type="text" id="overlay-input" placeholder="Tulis teks overlay" class="w-full border px-3 py-2 rounded bg-gray-100">
+                    </div>
+                    
+                    <div>
+                        <label for="overlay-font-size" class="block font-medium">Ukuran</label>
+                        <input type="range" id="overlay-font-size" min="10" max="100" value="24" class="w-full">
+                    </div>
+                    <div>
+                        <label for="overlay-rotation" class="block font-medium">Rotasi</label>
+                        <input type="range" id="overlay-rotation" min="-180" max="180" value="0" class="w-full">
+                    </div>
+
+                    <div>
+                        <label for="overlay-opacity" class="block font-medium">Opacity</label>
+                        <input type="range" id="overlay-opacity" min="0" max="1" step="0.05" value="1" class="w-full">
+                    </div>
+                     <div>
+                        <label for="overlay-color" class="block font-medium">Warna</label>
+                        <input type="color" id="overlay-color" value="#000000" class="w-full h-8 border-none p-0 rounded cursor-pointer bg-gray-100">
+                    </div>
+                    
+                    <div>
+                        <label for="overlay-brightness" class="block font-medium">Brightness</label>
+                        <input type="range" id="overlay-brightness" min="0" max="200" value="100" class="w-full">
+                    </div>
+                    <div>
+                        <label for="overlay-contrast" class="block font-medium">Contrast</label>
+                        <input type="range" id="overlay-contrast" min="0" max="200" value="100" class="w-full">
+                    </div>
+                  </div>
+                </div>
+
             </div>
 
             <div class="p-4 border-t border-gray-300 flex-shrink-0">
@@ -150,16 +215,11 @@
                         </li>
                         <li>
                             <strong>Langkah 3: Aksi Rahasia Anda</strong>
-                            <p>Saat penonton menyebutkan pilihan mereka (misal: "Ubud"), Anda melakukan input rahasia di ponsel Anda:</p>
-                             <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
-                                <li>Cari Grup yang berisi "Ubud" (misal, Grup "6-10").</li>
-                                <li>Ketuk Grup "6-10".</li>
-                                <li>Lima item akan muncul. Ketuk "Ubud".</li>
-                            </ul>
+                            <p>Saat penonton menyebutkan pilihan mereka (misal: "Ubud"), Anda melakukan input rahasia di ponsel Anda. Jika mode "Galeri" aktif, aksi ini akan langsung menyimpan gambar prediksi ke perangkat Anda.</p>
                         </li>
                         <li>
                             <strong>Langkah 4: Revelation</strong>
-                            <p>Aplikasi akan langsung membuka Google Maps ke lokasi yang benar. Tunjukkan layar ini kepada penonton sebagai bukti prediksi Anda akurat.</p>
+                            <p>Jika menggunakan mode URL, aplikasi akan membuka tautan. Jika mode "Galeri", Anda bisa membuka galeri foto untuk menunjukkan gambar yang baru saja dibuat.</p>
                         </li>
                     </ol>
                 </div>
@@ -167,10 +227,11 @@
                 <div>
                     <h4 class="font-semibold text-md mt-4 mb-2">Persiapan Sebelum Tampil</h4>
                      <p class="text-sm">Tekan ikon gerigi <img src="https://img.icons8.com/ios-glyphs/16/000000/settings.png" alt="settings icon" class="inline h-4 w-4 mx-1"> untuk mengatur trik Anda:
-                        <ul class="list-disc list-inside space-y-1 text-sm mt-2">
-                            <li><strong>Isi Daftar Prediksi:</strong> Masukkan semua kemungkinan lokasi yang akan Anda gunakan.</li>
-                            <li><strong>Pilih Cara Prediksi Dibuka:</strong> Atur apakah prediksi akan muncul di Google Maps, Google Search, atau Shortcut iOS.</li>
-                        </ul>
+                         <ul class="list-disc list-inside space-y-1 text-sm mt-2">
+                             <li><strong>Isi Daftar Prediksi:</strong> Masukkan semua kemungkinan lokasi yang akan Anda gunakan.</li>
+                             <li><strong>Pilih Mode Output:</strong> Atur apakah prediksi akan muncul di Google Maps, Google Search, Shortcut iOS atau diekspor ke Galeri.</li>
+                             <li><strong>Atur Overlay:</strong> Unggah gambar latar dan sesuaikan gaya teks untuk mode Galeri.</li>
+                         </ul>
                     </p>
                     <p class="text-sm mt-3 font-semibold">Berlatihlah melakukan aksi rahasia dengan cepat dan tidak terlihat. Selamat memukau penonton Anda!</p>
                 </div>
@@ -204,7 +265,19 @@
                     { startNumber: 1, regions: ['Pantai Kuta', 'Seminyak', 'Canggu', 'Garuda Wisnu Kencana', 'Pura Uluwatu'] },
                     { startNumber: 6, regions: ['Ubud', 'Sawah Terasering Tegalalang', 'Danau Beratan Bedugul', 'Tanah Lot', 'Pantai Lovina'] },
                     { startNumber: 11, regions: ['Nusa Dua', 'Sanur', 'Jimbaran', 'Gunung Batur', 'Tirta Empul'] }
-                ]
+                ],
+                overlaySettings: { // Default overlay settings
+                    text: 'Contoh Teks',
+                    fontSize: '24',
+                    color: '#000000',
+                    opacity: '1',
+                    rotation: '0',
+                    x: 0,
+                    y: 0,
+                    brightness: '100',
+                    contrast: '100',
+                    baseImage: null
+                }
             };
             
             // --- Elements ---
@@ -235,6 +308,12 @@
             // --- Main Functions ---
             function executeAction(regionName) {
                 const { searchEngine, shortcutName } = appData.settings;
+                
+                if (searchEngine === 'gallery') {
+                    triggerGalleryExport(regionName);
+                    return;
+                }
+
                 let url = '';
                 if (searchEngine === 'shortcut') {
                     if (!shortcutName) { 
@@ -266,8 +345,13 @@
                 const storedData = localStorage.getItem(STORAGE_KEY);
                 try {
                     const parsedData = JSON.parse(storedData);
-                    if (parsedData && parsedData.settings && parsedData.pages && parsedData.pages.length > 0) {
-                        return { ...defaultData, ...parsedData, settings: { ...defaultData.settings, ...parsedData.settings } };
+                    if (parsedData && parsedData.settings && parsedData.pages) {
+                        return {
+                            ...defaultData,
+                            ...parsedData,
+                            settings: { ...defaultData.settings, ...parsedData.settings },
+                            overlaySettings: { ...defaultData.overlaySettings, ...parsedData.overlaySettings }
+                        };
                     }
                     return defaultData;
                 } catch (e) { return defaultData; }
@@ -353,7 +437,9 @@
                     appData.pages = newPages;
                 }
 
+                saveOverlaySettings();
                 saveDataToStorage();
+
                 isSetSelectionMode = true; 
                 setPageIndex = 0;
                 updateGridView();
@@ -403,9 +489,212 @@
                 setTimeout(() => { updateGridView(); }, 200);
             }
 
+            // --- OVERLAY EDITOR ---
+            const overlayEditorContainer = document.getElementById('overlay-editor-container');
+            const overlayBaseImage = document.getElementById('overlay-base-image');
+            const overlayImageUpload = document.getElementById('overlay-image-upload');
+            const overlayTextEl = document.getElementById('overlay-text');
+            const overlayInput = document.getElementById('overlay-input');
+            const overlayFontSize = document.getElementById('overlay-font-size');
+            const overlayRotation = document.getElementById('overlay-rotation');
+            const overlayColor = document.getElementById('overlay-color');
+            const overlayOpacity = document.getElementById('overlay-opacity');
+            const overlayBrightness = document.getElementById('overlay-brightness');
+            const overlayContrast = document.getElementById('overlay-contrast');
+            
+            // Global state for overlay position
+            let xOffset = 0, yOffset = 0;
+
+            // Drag-specific state variables
+            let isDragging = false;
+            let startDragX = 0, startDragY = 0;
+            let startElX = 0, startElY = 0;
+
+            function updateOverlayStyle() {
+                const settings = appData.overlaySettings;
+                // This function applies all styles. It uses the global xOffset/yOffset for position.
+                overlayTextEl.style.transform = `translate(-50%, -50%) translate(${xOffset}px, ${yOffset}px) rotate(${settings.rotation}deg)`;
+                overlayTextEl.style.fontSize = `${settings.fontSize}px`;
+                overlayTextEl.style.color = settings.color;
+                overlayTextEl.style.opacity = settings.opacity;
+                overlayTextEl.style.filter = `brightness(${settings.brightness}%) contrast(${settings.contrast}%)`;
+                overlayTextEl.textContent = settings.text;
+            }
+
+            function loadOverlaySettings() {
+                const s = appData.overlaySettings || defaultData.overlaySettings;
+                appData.overlaySettings = s; 
+                
+                if (s.baseImage) {
+                    overlayBaseImage.src = s.baseImage;
+                }
+                
+                // Update UI controls
+                overlayInput.value = s.text;
+                overlayFontSize.value = s.fontSize;
+                overlayRotation.value = s.rotation;
+                overlayColor.value = s.color;
+                overlayOpacity.value = s.opacity;
+                overlayBrightness.value = s.brightness;
+                overlayContrast.value = s.contrast;
+                
+                // Load position into global state variables
+                xOffset = s.x || 0;
+                yOffset = s.y || 0;
+                
+                // Apply all styles from the loaded state
+                updateOverlayStyle();
+            }
+
+            function saveOverlaySettings() {
+                appData.overlaySettings = {
+                    text: overlayInput.value,
+                    fontSize: overlayFontSize.value,
+                    color: overlayColor.value,
+                    opacity: overlayOpacity.value,
+                    rotation: overlayRotation.value,
+                    x: xOffset, // Save current position
+                    y: yOffset, // Save current position
+                    brightness: overlayBrightness.value,
+                    contrast: overlayContrast.value,
+                    baseImage: appData.overlaySettings.baseImage // Preserve existing image
+                };
+            }
+
+            function dragStart(e) {
+                if (e.type === 'mousedown' && e.button !== 0) return;
+                e.preventDefault();
+                isDragging = true;
+                
+                startElX = xOffset;
+                startElY = yOffset;
+                
+                startDragX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+                startDragY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+                
+                overlayTextEl.style.cursor = 'grabbing';
+                document.body.style.cursor = 'grabbing'; // Change cursor for the whole page for better UX
+            }
+            
+            function drag(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                const currentDragX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+                const currentDragY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+                
+                const dx = currentDragX - startDragX;
+                const dy = currentDragY - startDragY;
+                
+                xOffset = startElX + dx;
+                yOffset = startElY + dy;
+                
+                // For performance, only update the transform property during the drag action
+                overlayTextEl.style.transform = `translate(-50%, -50%) translate(${xOffset}px, ${yOffset}px) rotate(${appData.overlaySettings.rotation}deg)`;
+            }
+
+            function dragEnd() {
+                if (!isDragging) return;
+                isDragging = false;
+                
+                overlayTextEl.style.cursor = 'move';
+                document.body.style.cursor = 'default';
+                
+                saveOverlaySettings(); // Save the final position
+            }
+
+            function triggerGalleryExport(text) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = () => {
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    
+                    const renderedRect = overlayBaseImage.getBoundingClientRect();
+                    const scaleX = img.naturalWidth / renderedRect.width;
+                    const scaleY = img.naturalHeight / renderedRect.height;
+                    
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const settings = appData.overlaySettings;
+                    const scaledFontSize = parseFloat(settings.fontSize) * scaleY;
+                    ctx.font = `bold ${scaledFontSize}px Inter, sans-serif`;
+                    ctx.fillStyle = settings.color;
+                    ctx.globalAlpha = parseFloat(settings.opacity);
+                    ctx.filter = `brightness(${settings.brightness}%) contrast(${settings.contrast}%)`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    const canvasCenterX = canvas.width / 2;
+                    const canvasCenterY = canvas.height / 2;
+                    const scaledX = settings.x * scaleX;
+                    const scaledY = settings.y * scaleY;
+                    
+                    const textX = canvasCenterX + scaledX;
+                    const textY = canvasCenterY + scaledY;
+
+                    ctx.save();
+                    ctx.translate(textX, textY);
+                    ctx.rotate(parseFloat(settings.rotation) * Math.PI / 180);
+                    ctx.fillText(text, 0, 0); // Use the provided text
+                    ctx.restore();
+
+                    const link = document.createElement('a');
+                    link.download = `prediksi-${text.replace(/\s+/g, '-').toLowerCase()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    showNotification(`"${capitalizeFirstLetter(text)}" diekspor!`);
+                };
+                
+                img.onerror = () => {
+                    showNotification("Gagal memuat gambar untuk ekspor.");
+                };
+                
+                img.src = overlayBaseImage.src;
+            }
+
+            function initializeOverlayEditor() {
+                ['input', 'change'].forEach(evt => {
+                    overlayInput.addEventListener(evt, () => { appData.overlaySettings.text = overlayInput.value; updateOverlayStyle(); saveOverlaySettings(); });
+                    overlayFontSize.addEventListener(evt, () => { appData.overlaySettings.fontSize = overlayFontSize.value; updateOverlayStyle(); saveOverlaySettings(); });
+                    overlayRotation.addEventListener(evt, () => { appData.overlaySettings.rotation = overlayRotation.value; updateOverlayStyle(); saveOverlaySettings(); });
+                    overlayColor.addEventListener(evt, () => { appData.overlaySettings.color = overlayColor.value; updateOverlayStyle(); saveOverlaySettings(); });
+                    overlayOpacity.addEventListener(evt, () => { appData.overlaySettings.opacity = overlayOpacity.value; updateOverlayStyle(); saveOverlaySettings(); });
+                    overlayBrightness.addEventListener(evt, () => { appData.overlaySettings.brightness = overlayBrightness.value; updateOverlayStyle(); saveOverlaySettings(); });
+                    overlayContrast.addEventListener(evt, () => { appData.overlaySettings.contrast = overlayContrast.value; updateOverlayStyle(); saveOverlaySettings(); });
+                });
+
+                overlayTextEl.addEventListener('mousedown', dragStart);
+                overlayTextEl.addEventListener('touchstart', dragStart, { passive: false });
+                document.addEventListener('mouseup', dragEnd);
+                document.addEventListener('touchend', dragEnd);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', drag, { passive: false });
+
+                overlayImageUpload.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const base64String = event.target.result;
+                            overlayBaseImage.src = base64String;
+                            appData.overlaySettings.baseImage = base64String;
+                            saveDataToStorage(); // Save image immediately
+                            showNotification("Gambar latar diperbarui!");
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                loadOverlaySettings();
+            }
+
             // --- Initial Load ---
             appData = loadDataFromStorage();
             updateGridView();
+            initializeOverlayEditor();
         });
     </script>
 </body>

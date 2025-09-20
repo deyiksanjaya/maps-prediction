@@ -49,9 +49,9 @@
         .modal-content-area::-webkit-scrollbar-track { background: #f1f1f1; }
         .modal-content-area::-webkit-scrollbar-thumb { background: #a8a8a8; border-radius: 4px; }
 
-        /* Added CSS for Overlay Editor */
+        /* REVISED CSS for Overlay Editor */
         #overlay-editor-container {
-          max-height: 250px;
+          /* max-height is removed to prevent cropping */
           touch-action: none; /* Prevent scrolling on mobile while dragging */
         }
         #overlay-text {
@@ -129,7 +129,7 @@
                   <h3 class="font-semibold mb-2">Overlay Prediksi</h3>
                   
                   <div id="overlay-editor-container" class="relative w-full border border-gray-300 rounded bg-gray-200 overflow-hidden flex items-center justify-center">
-                    <img id="overlay-base-image" src="https://placehold.co/600x400/e2e8f0/64748b?text=Pilih+Gambar" alt="Preview" class="max-w-full max-h-full block object-contain">
+                    <img id="overlay-base-image" src="https://placehold.co/600x400/e2e8f0/64748b?text=Pilih+Gambar" alt="Preview" class="max-w-full max-h-[250px] block object-contain">
                     <div id="overlay-text" class="absolute font-bold text-black cursor-move" style="font-size: 24px;">
                       Contoh Teks
                     </div>

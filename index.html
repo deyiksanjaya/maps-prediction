@@ -620,7 +620,7 @@
                     
                     const settings = appData.overlaySettings;
                     const scaledFontSize = parseFloat(settings.fontSize) * scaleY;
-                    ctx.font = `bold ${scaledFontSize}px Inter, sans-serif`;
+                    ctx.font = `bold ${scaledFontSize}px sans-serif`;
                     ctx.fillStyle = settings.color;
                     ctx.globalAlpha = parseFloat(settings.opacity);
                     ctx.filter = `brightness(${settings.brightness}%) contrast(${settings.contrast}%)`;

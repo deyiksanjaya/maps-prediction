@@ -4,7 +4,7 @@
   "description": "Aplikasi prediksi free choice di google map / google search",
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#ffffff",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "https://img.icons8.com/parakeet-line/192/map-marker.png",
